@@ -33,4 +33,3 @@
 
 - name: Include Wireguard Setup playbook
   import_playbook: "setup-wireguard.yml"
-

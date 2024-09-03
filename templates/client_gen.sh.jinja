@@ -1,6 +1,6 @@
 script_path={{ script_path }}
 results_path={{ results_path }}
-nflow_index={{ index[ansible_hostname] }}
+nflow_index={{ index[ansible_nodename] }}
 
 {% if wg_activated %}
 netperf_suffix=" -L 192.168.0.$(( nflow_index + 1 ))"
@@ -23,7 +23,7 @@ udp_test=" --udp "
 total_time={{ unit_time_s }}
 n_clients={{ n_clients }}
 now="date +%H:%M:%S"
-offset={{ (index[ansible_hostname] - 1)*batch }}
+offset={{ (index[ansible_nodename] - 1)*batch }}
 
 # Delete residual data
 rm -r /tmp/results
@@ -63,7 +63,7 @@ for n_core in $ncore_set ; do
 		# killall iperf3
 		pre_heat=4
 		sleep $pre_heat
-		# sleep $(( {{ index[ansible_hostname] * 0.5 }} ))
+		# sleep $(( {{ index[ansible_nodename] * 0.5 }} ))
 		echo [`$now`] Starting netperf of $n_flow clients...
 		for i in `seq 1 $n_flow`; do
 			{% if wg_activated %}
@@ -71,10 +71,10 @@ for n_core in $ncore_set ; do
 			{% else %}
 			ip_addr=`ifconfig eno1 | head -2 | tail -1 | awk '{print $2}'`
 			{% endif %}
-			iperf3 -c {{ target_index[ansible_hostname] }} -b {{ bandwidth }} -l {{ packet_size }}  -p $(( 12865 + $i )) -t 0 -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
-			# netperf -H {{ target_index[ansible_hostname] }} -t TCP_MAERTS -L $ip_addr -l {{ unit_time_s }} -D 1 -f m -p $(( 13865 + $i )) > netperf_$i.log &
+			iperf3 -c {{ target_index[ansible_nodename] }} -b {{ bandwidth }} -l {{ packet_size }}  -p $(( 12865 + $i )) -t 0 -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
+			# netperf -H {{ target_index[ansible_nodename] }} -t TCP_MAERTS -L $ip_addr -l {{ unit_time_s }} -D 1 -f m -p $(( 13865 + $i )) > netperf_$i.log &
 
-			netperf -H {{ target_index[ansible_hostname] }} -L $ip_addr -t {{ latency_test }} -l {{ unit_time_s }} -p $(( 15865 + $i )) -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf_rr_$i.log &
+			netperf -H {{ target_index[ansible_nodename] }} -L $ip_addr -t {{ latency_test }} -l {{ unit_time_s }} -p $(( 15865 + $i )) -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf_rr_$i.log &
 		done
 		mkdir sar
 		cd sar

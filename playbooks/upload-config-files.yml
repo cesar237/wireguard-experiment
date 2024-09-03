@@ -5,117 +5,89 @@
   gather_facts: false
 
   tasks:
-    - name: Send retrieve_data script
-      template:
-        src: templates/retrieve_data.sh.jinja
-        dest: /tmp/scripts/retrieve_data.sh
-    - name: Send inventory.yaml
-      copy:
-        src: inventory.yaml
-        dest: inventory.yaml
-    - name: Send retrieve_sar script
-      template:
-        src: templates/retrieve_sar.sh.jinja
-        dest: /tmp/scripts/retrieve_sar.sh
-    - name: Send analyse sar script
-      template:
-        src: templates/analyse.sh.jinja
-        dest: /tmp/analyse.sh
-    - name: Send retrieve_poll script
-      template:
-        src: templates/retrieve_poll.sh.jinja
-        dest: /tmp/scripts/retrieve_poll.sh
-    - name: Send retrieve_trace script
-      template:
-        src: templates/retrieve_trace.sh.jinja
-        dest: /tmp/scripts/retrieve_trace.sh
     - name: Send activate_wg.sh script
       template:
-        src: templates/activate_wg.sh.jinja
+        src: ../templates/activate_wg.sh.jinja
         dest: /tmp/scripts/activate_wg.sh
     - name: Send client keypairs         
       copy:
-        src: keypairs.json
+        src: ../static/keypairs.json
         dest: keypairs.json
     - name: Send median_val.py         
       copy:
-        src: templates/median_val.py
+        src: ../templates/median_val.py
         dest: /tmp/median_val.py                    
     - name: Send server keypairs         
       copy:
-        src: server_keypairs.json          
+        src: ../static/server_keypairs.json          
         dest: server_keypairs.json
     - name: Send convert_to_csv script
       copy:
-        src: templates/convert_to_csv.py
+        src: ../templates/convert_to_csv.py
         dest: /tmp/scripts/convert_to_csv.py
     - name: Send requirements for convert_to_csv script
       copy:
-        src: templates/requirements.txt
+        src: ../templates/requirements.txt
         dest: /tmp/scripts/requirements.txt
     - name: Send cpu_set.sh
       copy:
-        src: templates/cpu_set.sh
+        src: ../templates/cpu_set.sh
         dest: /tmp/scripts/cpu_set.sh
     - name: Send wireguard conf generator
       copy:
-        src: templates/wg_gen_server_conf.py
+        src: ../templates/wg_gen_server_conf.py
         dest: /tmp/scripts/wg_gen.py
     - name: Send trace.parser.py
       copy:
-        src: templates/trace.parser.py
+        src: ../templates/trace.parser.py
         dest: /tmp/scripts/trace.parser.py
     - name: Send poll parser
       copy:
-        src: templates/poll.parser.py
+        src: ../templates/poll.parser.py
         dest: /tmp/scripts/poll.parser.py
     - name: Send decrypt.parser.py
       copy:
-        src: templates/decrypt.parser.py
+        src: ../templates/decrypt.parser.py
         dest: /tmp/scripts/decrypt.parser.py
     - name: Send init_server.sh script
       copy:
-        src: templates/init_server.sh
+        src: ../templates/init_server.sh
         dest: /tmp/scripts/init_server.sh
-    - name: Send TARGETS list
-      copy:
-        src: TARGETS
-        dest: TARGETS
     - name: Send perf.parser.py
       copy:
-        src: templates/perf.parser.py
+        src: ../templates/perf.parser.py
         dest: /tmp/scripts/perf.parser.py
     - name: Send wg_test_decrypt_worker_analysis.sh
       copy:
-        src: templates/wg_test_decrypt_worker_analysis.sh
+        src: ../templates/wg_test_decrypt_worker_analysis.sh
         dest: /tmp/scripts/wg_test_decrypt_worker_analysis.sh
     - name: Send wg_test_tx_worker_analysis.sh
       copy:
-        src: templates/wg_test_tx_worker_analysis.sh
+        src: ../templates/wg_test_tx_worker_analysis.sh
         dest: /tmp/scripts/wg_test_tx_worker_analysis.sh
     - name: Send wg_test_scheduler_analysis.sh
       copy:
-        src: templates/wg_test_scheduler_analysis.sh
+        src: ../templates/wg_test_scheduler_analysis.sh
         dest: /tmp/scripts/wg_test_scheduler_analysis.sh
     - name: Send rx poll test
       copy:
-        src: templates/wg_test_rx_poll_analysis.sh
+        src: ../templates/wg_test_rx_poll_analysis.sh
         dest: /tmp/scripts/wg_test_rx_poll_analysis.sh
     - name: Send wg_test_function_execution_time.sh
       copy:
-        src: templates/wg_test_function_execution_time.sh
+        src: ../templates/wg_test_function_execution_time.sh
         dest: /tmp/scripts/wg_test_function_execution_time.sh
     - name: Send wg_test_trace_printk.sh
       copy:
-        src: templates/wg_test_trace_printk.sh
+        src: ../templates/wg_test_trace_printk.sh
         dest: /tmp/scripts/wg_test_trace_printk.sh
     - name: Send wg_test_global_perf.sh
       copy:
-        src: templates/wg_test_global_perf.sh
+        src: ../templates/wg_test_global_perf.sh
         dest: /tmp/scripts/wg_test_global_perf.sh
     - name: Send test.sh script
       template:
-        src: templates/test.sh.jinja
+        src: ../templates/test.sh.jinja
         dest: /tmp/scripts/test.sh
     - name: Make all scripts executable
       shell:
@@ -128,49 +100,41 @@
   gather_facts: false
 
   tasks:
-    - name: Send wg_client.conf
-      template:
-        src: templates/wg_client.conf.jinja
-        dest: wg.conf
-    - name: Send retrieve_data script
-      template:
-        src: templates/retrieve_data.sh.jinja
-        dest: /tmp/scripts/retrieve_data.sh
-    - name: Send analyse sar script
-      template:
-        src: templates/analyse.sh.jinja
-        dest: /tmp/analyse.sh
+    # - name: Send wg_client.conf
+    #   template:
+    #     src: ../templates/wg_client.conf.jinja
+    #     dest: wg.conf
     - name: Send median_val.py         
       copy:
-        src: templates/median_val.py
+        src: ../templates/median_val.py
         dest: /tmp/median_val.py     
     - name: Send client keypairs
       copy:
-        src: keypairs.json
+        src: ../static/keypairs.json
         dest: keypairs.json
     - name: Send server keypairs
       copy:
-        src: server_keypairs.json
+        src: ../static/server_keypairs.json
         dest: server_keypairs.json
     - name: Send client generator script
       template:
-        src: templates/client_gen.sh.jinja
+        src: ../templates/client_gen.sh.jinja
         dest: /tmp/scripts/test.sh
     - name: Send limit_bandwidth script
       template:
-        src: templates/limit_bandwidth.sh.jinja
+        src: ../templates/limit_bandwidth.sh.jinja
         dest: /tmp/scripts/limit_bandwidth.sh
     - name: Send unlimit_bandwidth script
       copy:
-        src: templates/unlimit_bandwidth.sh
+        src: ../templates/unlimit_bandwidth.sh
         dest: /tmp/scripts/unlimit_bandwidth.sh
     - name: Send HEY script
       copy:
-        src: templates/hey_linux_amd64
+        src: ../templates/hey_linux_amd64
         dest: /tmp/scripts/hey_linux_amd64
     - name: Send wireguard conf generator
       copy:
-        src: templates/wg_gen_client_conf.py
+        src: ../templates/wg_gen_client_conf.py
         dest: /tmp/scripts/wg_gen.py
     - name: Make all scripts executable
       shell:
@@ -184,27 +148,27 @@
   tasks:
     - name: Send netserver launcher
       template:
-        src: templates/launch_netserver.sh.jinja
+        src: ../templates/launch_netserver.sh.jinja
         dest: /tmp/scripts/test.sh
     - name: Send NWEB lightweight http server
       copy:
-        src: templates/nweb
+        src: ../templates/nweb
         dest: /tmp/scripts/nweb
     - name: Send Index file of 1M
       copy:
-        src: templates/index.html.1M
+        src: ../templates/index.html.1M
         dest: /var/www/html/file_1M.html
     - name: Send Index file of 100K
       copy:
-        src: templates/index.html.100K
+        src: ../templates/index.html.100K
         dest: /var/www/html/file_100K.html
     - name: Send Index file of 10K
       copy:
-        src: templates/index.html.10K
+        src: ../templates/index.html.10K
         dest: /var/www/html/file_10K.html
     - name: Send Index file of 1K
       copy:
-        src: templates/index.html.1K
+        src: ../templates/index.html.1K
         dest: /var/www/html/file_1K.html
     - name: Make all scripts executable
       shell: chmod +x -R /tmp/scripts

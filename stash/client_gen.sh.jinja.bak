@@ -1,6 +1,6 @@
 script_path={{ script_path }}
 results_path={{ results_path }}
-nflow_index={{ index[ansible_hostname] }}
+nflow_index={{ index[ansible_nodename] }}
 
 {% if wg_activated %}
 netperf_suffix=" -L 192.168.0.$(( nflow_index + 1 ))"
@@ -23,7 +23,7 @@ udp_test=" --udp "
 total_time={{ unit_time_s }}
 n_clients={{ n_clients }}
 now="date +%H:%M:%S"
-offset={{ (index[ansible_hostname] - 1)*batch }}
+offset={{ (index[ansible_nodename] - 1)*batch }}
 # echo "Activate Wireguard interface"
 # for i in `ls ~/confs`; do wg-quick up ~/confs/$i ; done
 # /tmp/scripts/limit_bandwidth.sh
@@ -65,7 +65,7 @@ for n_core in $ncore_set ; do
 		{% else %}
 		ip_addr=`ifconfig eno1 | head -2 | tail -1 | awk '{print $2}'`
 		{% endif %}
-		iperf3 -c {{ target_index[ansible_hostname] }} -b $n_flow -l {{ packet_size }} $udp_test -p 12866 -t 0 -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile iperf3.log &
+		iperf3 -c {{ target_index[ansible_nodename] }} -b $n_flow -l {{ packet_size }} $udp_test -p 12866 -t 0 -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile iperf3.log &
 		# done
 		mkdir sar
 		cd sar
@@ -98,7 +98,7 @@ for n_core in $ncore_set ; do
 			{% else %}
 			ip_addr=`ifconfig eno1 | head -2 | tail -1 | awk '{print $2}'`
 			{% endif %}
-			netperf -H {{ target_index[ansible_hostname] }} -L $ip_addr -t {{ latency_test }} -l {{ unit_time_s }} -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf_rr_$i.log &
+			netperf -H {{ target_index[ansible_nodename] }} -L $ip_addr -t {{ latency_test }} -l {{ unit_time_s }} -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf_rr_$i.log &
 		done
 		cd ..
 		sleep {{ unit_time_s }}
@@ -109,7 +109,7 @@ for n_core in $ncore_set ; do
 		# killall iperf3
 		pre_heat=4
 		sleep $pre_heat
-		# sleep $(( {{ index[ansible_hostname] * 0.5 }} ))
+		# sleep $(( {{ index[ansible_nodename] * 0.5 }} ))
 		echo [`$now`] Starting netperf of $n_flow clients...
 		for i in `seq 1 $n_flow`; do
 			# ip_addr=`ifconfig wg-$i | head -2 | tail -1 | awk '{print $2}'`
@@ -118,7 +118,7 @@ for n_core in $ncore_set ; do
 			{% else %}
 			ip_addr=`ifconfig eno1 | head -2 | tail -1 | awk '{print $2}'`
 			{% endif %}
-			iperf3 -c {{ target_index[ansible_hostname] }} -b {{ bandwidth }} -l {{ packet_size }} $udp_test -p $(( 12865 + $i - 1 )) -t 0  -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
+			iperf3 -c {{ target_index[ansible_nodename] }} -b {{ bandwidth }} -l {{ packet_size }} $udp_test -p $(( 12865 + $i - 1 )) -t 0  -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
 		done
 		mkdir sar
 		cd sar
@@ -130,7 +130,7 @@ for n_core in $ncore_set ; do
 
 		{% if test_hey %}
 
-		local_index={{ index[ansible_hostname] }}
+		local_index={{ index[ansible_nodename] }}
 		file_size=
 
 		case $local_index in
@@ -153,8 +153,8 @@ for n_core in $ncore_set ; do
 			{% else %}
 			ip_addr=`ifconfig eno1 | head -2 | tail -1 | awk '{print $2}'`
 			{% endif %}
-			# iperf3 -c {{ target_index[ansible_hostname] }} -b {{ bandwidth }} -l {{ packet_size }} $udp_test -p $(( 12865 + $i - 1 )) -t 0  -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile netperf-$i.log &
-			target={{ target_index[ansible_hostname] }}
+			# iperf3 -c {{ target_index[ansible_nodename] }} -b {{ bandwidth }} -l {{ packet_size }} $udp_test -p $(( 12865 + $i - 1 )) -t 0  -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile netperf-$i.log &
+			target={{ target_index[ansible_nodename] }}
 			nohup /tmp/scripts/hey_linux_amd64 \
 				-z {{ webserver_test_length }} \
 				-c {{ webserver_nworker }} \
@@ -178,7 +178,7 @@ done
 # {% if test_iperf3 %}
 # for i in `seq 1 $last`; do
 # 	ip_addr=`ifconfig wg-$i | head -2 | tail -1 | awk '{print $2}'`
-# 	iperf3 -c {{ target_index[ansible_hostname] }} -b {{ bandwidth }} -l {{ packet_size }} $udp_test -p $(( 12865 + $i - 1 )) -t 0  -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
+# 	iperf3 -c {{ target_index[ansible_nodename] }} -b {{ bandwidth }} -l {{ packet_size }} $udp_test -p $(( 12865 + $i - 1 )) -t 0  -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
 # done
 # # killall -s SIGINT iperf3
 # {% endif %}

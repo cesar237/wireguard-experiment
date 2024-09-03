@@ -1,4 +1,5 @@
 {
     "editor.wordWrap": "bounded",
-    "editor.wordWrapColumn": 80
+    "editor.wordWrapColumn": 80,
+    "ansible.python.interpreterPath": "/bin/python"
 }

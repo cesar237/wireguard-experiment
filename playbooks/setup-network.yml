@@ -18,7 +18,7 @@
     - name: Add route to target
       ignore_errors: true
       shell: 
-        cmd: ip route add {{ hostvars[target_index[ansible_hostname]]['ansible_default_ipv4']['address'] }} via {{ server_address }}
+        cmd: ip route add {{ hostvars[target_index[ansible_nodename]]['ansible_default_ipv4']['address'] }} via {{ server_address }}
     - name: Enable Ipv4 forwarding
       shell:
         cmd: sysctl net.ipv4.ip_forward=1

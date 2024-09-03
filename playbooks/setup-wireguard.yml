@@ -22,7 +22,7 @@
           -k keypairs.json \
           -s server_keypairs.json \
           -n {{ batch }} \
-          -i {{ index[ansible_hostname] }} \
+          -i {{ index[ansible_nodename] }} \
           {% if is_personal %} -m {% endif %} \
           -o confs \
           -d {{ server_address }}

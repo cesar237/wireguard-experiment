@@ -1,12 +1,11 @@
 all:
   vars:
     root_dir: "~/wireguard-experiment"
-    keypairs: "{{ lookup('file', 'keypairs.json') | from_json }}"
-    index: "{{ lookup('file', 'index.json') | from_json }}"
-    target_index: "{{ lookup('file', 'target_index.json') | from_json }}"
-    server_keypairs: "{{ lookup('file', 'server_keypairs.json') | from_json }}"
+    keypairs: "{{ lookup('file', '../static/keypairs.json') | from_json }}"
+    index: "{{ lookup('file', '../static/index.json') | from_json }}"
+    target_index: "{{ lookup('file', '../static/target_index.json') | from_json }}"
+    server_keypairs: "{{ lookup('file', '../static/server_keypairs.json') | from_json }}"
     server_address: "{{ hostvars[groups['server'][0]]['ansible_facts']['default_ipv4']['address'] }}"
-    # target_address: "{{ hostvars[groups['target'][0]]['ansible_facts']['default_ipv4']['address'] }}"
     username_server: root
     username_client: root
     username_target: root
@@ -26,3 +25,4 @@ all:
     script_path: "/tmp/scripts"
     results_path: "/tmp/results"
     ftrace_path: "/sys/kernel/debug/tracing"
+    
