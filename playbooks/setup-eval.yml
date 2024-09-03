@@ -1,0 +1,36 @@
+---
+- name: Gather all facts
+  hosts: all
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: Gather all facts
+      gather_facts:
+        parallel: true  
+
+- name: Include wireguard installation playbook
+  import_playbook: "install-wg-userspace.yml"
+
+- name: Create scripts and results directories 
+  hosts: all
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: Create scripts directory
+      shell:
+        cmd: mkdir -p /tmp/scripts
+    - name: Create results directory
+      shell:
+        cmd: mkdir -p {{ results_path }}
+
+- name: Include Config File Upload playbook
+  import_playbook: "upload-config-files.yml"
+
+- name: Include network configuration playbook
+  import_playbook: "setup-network.yml"
+
+- name: Include Wireguard Setup playbook
+  import_playbook: "setup-wireguard.yml"
+

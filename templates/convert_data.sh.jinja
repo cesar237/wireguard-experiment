@@ -1,0 +1,92 @@
+# $1 The first parameter is the path where the results are saved
+results_path={{ results_path }}
+script_path={{ script_path }}
+
+cd $results_path
+
+for cpu in `ls -d */`; do
+	# For each CPU-X like file
+	cd $cpu;
+	echo "Analysing data for $cpu";
+	for flow in `ls`; do
+		# NFLOW-2
+		cd $flow;
+
+		echo "Analysing data for $flow";
+		# Retreive SAR data
+
+		echo "Retrieving sar data...";
+		cd sar;
+		## network
+		echo "   ... for network";
+		sadf -d sar.data -- -n DEV,EDEV -P ALL > sar.network.csv;
+		## memory
+		echo "   ... for memory";
+		sadf -d sar.data -- -r ALL -P ALL > sar.memory.csv;
+		## cpu
+		echo "   ... for cpu";
+		sadf -d sar.data -- -u ALL -P ALL > sar.cpu.csv;
+
+		rm sar.data;
+		cd ..;
+		echo "Retrieving sar data done!";
+
+		# Retreive Perf data
+		cd perf;
+		echo "Retrieving perf data...";
+		perf script > perf.output;
+		# trace-cmd report -f > trace.functions;
+		python3 $script_path/perf.parser.py --input perf.output --output perf.csv;
+		rm perf.data perf.output;
+		cd ..;
+		echo "Retrieving perf data...done!";
+
+		# Retreive Perf data
+		cd flame_graph;
+		echo "Retrieving perf data...";
+		perf script | $script_path/FlameGraph/stackcollapse-perf.pl > out.perf-folded
+		# trace-cmd report -f > trace.functions;
+		$script_path/FlameGraph/flamegraph.pl out.perf-folded > perf.svg
+		rm perf.data out.perf-folded;
+		cd ..;
+		echo "Retrieving perf data...done!";
+
+		# Retrieve trace data
+		echo "Retrieving trace data...";
+		cd trace;
+		cd toplevel;
+		echo "    ... for toplevel functions";
+		trace-cmd report -f > trace.functions;
+		trace-cmd report -R > trace.raw;
+		python3 $script_path/trace.parser.py -i trace.raw -o trace.csv;
+		rm trace.dat trace.functions trace.raw;
+		cd ../;
+		cd wg_packet_decrypt_worker;
+		echo "    ... for wg_packet_decrypt_worker";
+		trace-cmd report -f > trace.functions;
+		trace-cmd report -R > trace.raw;
+		python3 $script_path/trace.parser.py -i trace.raw -o trace.csv;
+		rm trace.dat trace.functions trace.raw;
+		cd ..;
+		cd wg_packet_rx_poll;
+		echo "    ... for wg_packet_rx_poll";
+		trace-cmd report -f > trace.functions;
+		trace-cmd report -R > trace.raw;
+		python3 $script_path/trace.parser.py -i trace.raw -o trace.csv;
+		rm trace.dat trace.functions trace.raw;
+		cd ..;
+		cd wg_retrieve;
+		echo "    ... for wg_retrieve";
+		trace-cmd report -f > trace.functions;
+		trace-cmd report -R > trace.raw;
+		python3 $script_path/trace.parser.py -i trace.raw -o trace.csv;
+		rm trace.dat trace.functions trace.raw;
+		cd ..;
+		echo "Retrieving trace data...done!";
+		cd ..
+	cd ..;
+	done;
+cd ..;
+done;
+
+cd $results_path

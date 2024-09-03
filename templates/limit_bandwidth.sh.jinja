@@ -1,0 +1,11 @@
+# limit bandwidth
+# $1 = device name (br0)
+# $2 = bandwith with unit (for example 1024mbit)
+n_clients={{ n_clients }}
+batch={{ batch }}
+
+{% if limited_bandwidth %}
+for i in `seq 1 {{ batch }}`; do
+    tc qdisc add dev wg-$i root tbf rate {{ limit_bandwidth }} latency 1ms burst 1540
+done
+{% endif %}

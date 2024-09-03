@@ -1,0 +1,15 @@
+# Call the script like retrieve_data_for_ncpu.sh $results.path/$cpu
+input_dir=$1
+
+results_path={{ results_path }}
+scripts_path={{ script_path }}
+
+
+cd $results_path
+cd $input_dir
+
+echo "Retreive function_graph data"; 
+python3 /tmp/scripts/trace.parser.py;
+echo "Done!";
+
+cd $results_path

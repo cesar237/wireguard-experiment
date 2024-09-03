@@ -1,0 +1,11 @@
+[Interface]
+Address = 192.168.0.{{ index[ansible_hostname] + 1 }}
+PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eno1 -j MASQUERADE; ip rule add from 192.168.0.{{ index[ansible_hostname] + 1 }} lookup 2
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eno1 -j MASQUERADE; ip rule del from 192.168.0.{{ index[ansible_hostname] + 1 }} lookup 2
+PrivateKey = {{ keypairs[index[ansible_hostname]|string]["Private Key"] }}
+Table = 2
+
+[Peer]
+PublicKey = {{ server_keypairs["1"]["Public Key"] }}
+AllowedIPs = 0.0.0.0/0
+Endpoint = {{ server_address }}:51820

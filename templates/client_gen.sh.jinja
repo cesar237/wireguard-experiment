@@ -1,0 +1,107 @@
+script_path={{ script_path }}
+results_path={{ results_path }}
+nflow_index={{ index[ansible_hostname] }}
+
+{% if wg_activated %}
+netperf_suffix=" -L 192.168.0.$(( nflow_index + 1 ))"
+{% else %}
+netperf_suffix=
+{% endif %}
+
+{% if download %}
+iperf3_DOWN=" -R "
+{% endif %}
+
+{% if bidirectional %}
+iperf3_BI=" --bidir "
+{% endif %}
+
+{% if iperf_udp %}
+udp_test=" --udp "
+{% endif %}
+ 
+total_time={{ unit_time_s }}
+n_clients={{ n_clients }}
+now="date +%H:%M:%S"
+offset={{ (index[ansible_hostname] - 1)*batch }}
+
+# Delete residual data
+rm -r /tmp/results
+rm /tmp/client-data.zip
+
+mkdir -p /tmp/results
+
+# sleep 3
+cd $results_path
+last=0
+modality=flow
+
+{% if hyperthreaded %}
+ncore_set=36
+{% else %}
+ncore_set="18 36"
+{% endif %}
+
+
+for run in `seq 1 {{runs}}`; do
+mkdir -p run-$run
+cd run-$run
+echo "[`$now`] Launching tests RUN=$run..."
+
+for n_core in $ncore_set ; do
+    mkdir -p CPU-$n_core
+    cd CPU-$n_core
+
+	mod=nflow
+	for n_flow in {{ nflow_set }}; do
+		
+		echo "[`$now`] Test Case: n_core=$n_core, n_flow=$n_flow"
+		mkdir -p $mod-$n_flow
+		cd $mod-$n_flow
+
+		# {% if test_iperf3 %}
+		# killall iperf3
+		pre_heat=4
+		sleep $pre_heat
+		# sleep $(( {{ index[ansible_hostname] * 0.5 }} ))
+		echo [`$now`] Starting netperf of $n_flow clients...
+		for i in `seq 1 $n_flow`; do
+			{% if wg_activated %}
+			ip_addr=`ifconfig wg-$i | head -2 | tail -1 | awk '{print $2}'`
+			{% else %}
+			ip_addr=`ifconfig eno1 | head -2 | tail -1 | awk '{print $2}'`
+			{% endif %}
+			iperf3 -c {{ target_index[ansible_hostname] }} -b {{ bandwidth }} -l {{ packet_size }}  -p $(( 12865 + $i )) -t 0 -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
+			# netperf -H {{ target_index[ansible_hostname] }} -t TCP_MAERTS -L $ip_addr -l {{ unit_time_s }} -D 1 -f m -p $(( 13865 + $i )) > netperf_$i.log &
+
+			netperf -H {{ target_index[ansible_hostname] }} -L $ip_addr -t {{ latency_test }} -l {{ unit_time_s }} -p $(( 15865 + $i )) -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf_rr_$i.log &
+		done
+		mkdir sar
+		cd sar
+		rm -f sar.data
+		sar -A -o sar.data 1 $(( {{ unit_time_s }} - pre_heat )) > /dev/null
+		killall -s SIGINT iperf3
+		killall -s SIGINT netperf
+		cd ..
+		# {% endif %}
+
+		echo [`$now`] Done!
+		cd ..
+		last=$n_flow
+	done
+
+	echo
+	cd .. 
+	killall -s SIGINT iperf3
+	killall netperf
+done
+
+cd /tmp/results
+
+done
+
+export ZSTD_CLEVEL=19
+export ZSTD_NBTHREADS=$(( nproc ))
+
+cd /tmp
+tar --create --zstd --file results.tar.zst results/

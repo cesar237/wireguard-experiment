@@ -1,0 +1,126 @@
+#! /bin/bash
+# $1 = Number of flows
+# $2 = namedir (for fixed_rates and unfixed_rates)
+
+script_path={{ script_path }}
+results_path={{ results_path }}
+test_duration={{ unit_time_s }}
+irqbalanced={{ irqbalanced }}
+now="date +%H:%M:%S"
+
+# Delete residual data
+rm -r /tmp/results
+rm /tmp/outputs.zip
+rm /tmp/data.zip
+
+cpupower frequency-set -g performance
+
+{% if all_on_core_0 %}
+echo "Redirecting all interrupts on core 0...."
+first_irq=`cat /proc/interrupts | grep "pci:0000:18:00.0" | awk '{ print $1 }' | tr ':' ' '`
+nr_cpus=`nproc`
+for i in `seq 0 $nr_cpus`; do 
+	echo 0,00000001 > /proc/irq/$(( i + first_irq ))/smp_affinity; 
+done
+echo "Done!"
+{% endif %}
+
+{% if deactivate_rss %}
+echo "Deactivating RSS..."
+ethtool -L eno1 combined 1
+ethtool -K eno1 receive-hashing off
+echo "Done!"
+{% endif %}
+
+ethtool -G eno1 tx {{ queue_length }} rx {{ queue_length }}
+
+{% if irqbalanced %}
+apt install -y irqbalance;
+irqbalance -t 3 -d > /tmp/results/$n_core/$n_flow/irqbalance.log &
+{% else %}
+service irqbalance stop;
+{% endif %}
+
+
+{% if hyperthreaded %}
+ncore_set="36"
+{% else %}
+ncore_set="18 36"
+{% endif %}
+
+echo {{ smt }} > /sys/devices/system/cpu/smt/control
+
+echo {{ threaded }} > /sys/class/net/wg/threaded
+
+{% if pinned_napi %}
+count=0
+number_of_cpus=`nproc`
+for pid in `pgrep napi`; do
+	core=$((count % number_of_cpus)); 
+	echo $core,$((core+1))
+	taskset -cp $core,$((core + 1)) $pid
+	count=$((count + 1)); 
+done
+{% endif %}
+
+{% if apply_sched_policy %}
+for pid in `pgrep wg`; do
+	chrt {{ sched_policy }} -p {{ sched_priority }} $pid
+done
+for pid in `pgrep napi`; do
+	chrt {{ sched_policy }} -p {{ sched_priority }} $pid
+done
+# chrt {{ sched_policy }} -a {{ sched_priority }}
+{% endif %}
+
+{% if irqbalanced %}
+irqbalance -t 1 -d > /tmp/results/run-$run/$n_core/$n_flow/irqbalance.log &
+{% endif %}
+
+for run in `seq 1 {{ runs }}`; do
+cd /tmp/results
+mkdir -p run-$run
+cd run-$run
+echo "[`$now`] Launching tests RUN=$run..."
+results_path={{ results_path }}/run-$run
+
+for n_core in $ncore_set ; do
+	echo "[`$now`] Test_case: n_core=$n_core"
+	root_path=$results_path;
+	mkdir -p $root_path;
+
+	for n_flow in {{ nflow_set }}; do
+		SECONDS=0
+		start=`date +%S`
+		start_min=`date +%M`
+
+		mkdir -p /tmp/results/run-$run/$n_core/$n_flow
+
+		echo "[`$now`] Test_case: n_flow=$n_flow"
+		echo "[`$now`] Launching global_perf test..."
+		# sleep 0
+		$script_path/wg_test_global_perf.sh $results_path $n_core $n_flow # 60 secs
+		echo "[`$now`] Launching global_perf test...Done"
+
+		# echo "[`$now`] Launching sched trace test..."
+		# $script_path/wg_test_trace_printk.sh $results_path $n_core $n_flow # 30 secs
+		# echo "[`$now`] Launching sched trace test...Done"
+
+		echo "[`$now`] Done!"
+		end=`date +%S`
+		end_min=`date +%M`
+		duration=`bc <<< "( (($end_min - $start_min + 60) % 60 ) * 60 + $end - $start ) "`
+		echo "[`$now`] trace-cmd start at $start_min:$start and end at $end_min:$end, so done in $duration secs. Sleeping for $(( {{ unit_time_s }} - duration ))..."
+		sleep $(( {{ unit_time_s }} - duration ))
+	done
+done
+
+cd /tmp/results
+
+done
+
+export ZSTD_CLEVEL=19
+export ZSTD_NBTHREADS=$(( nproc ))
+
+cd /tmp
+tar --create --zstd --file results.tar.zst results

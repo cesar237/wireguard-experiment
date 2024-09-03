@@ -1,0 +1,60 @@
+---
+- name: Gather all facts
+  hosts: all
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: Gather all facts
+      gather_facts:
+        parallel: true 
+
+- name: Include dependencies installation playbook
+  import_playbook: "install-dependencies.yml"
+
+- name: Install Go and wireguard-go on server
+  hosts: server
+  remote_user: "{{ username_server }}"
+  gather_facts: false
+
+  tasks:
+    - name : Download Go
+      shell : wget https://dl.google.com/go/go1.20.5.linux-amd64.tar.gz
+    - name : Untar go archive
+      shell : tar -C /usr/local -xzf go1.20.5.linux-amd64.tar.gz
+    - name: Make go runnable in PATH
+      shell: ln -fs /usr/local/go/bin/go /usr/bin/go
+    - name: Make gofmt runnable in PATH
+      shell: ln -fs /usr/local/go/bin/gofmt /usr/bin/gofmt
+    - name : Get vanilla Wireguard-go source code
+      git:
+        repo: https://git.zx2c4.com/wireguard-go
+        dest: /tmp/scripts/wireguard-go
+        force: true
+    - name : Get vanilla Wireguard-rs source code
+      git:
+        repo: https://git.zx2c4.com/wireguard-rs
+        dest: /tmp/scripts/wireguard-rs
+        force: true
+    - name : Get tailscale Wireguard-go source code
+      git:
+        repo: https://github.com/tailscale/wireguard-go.git
+        dest: /tmp/scripts/tailscale/wireguard-go
+        force: true
+    - name: Build Wireguard-go
+      shell: cd /tmp/scripts/wireguard-go && make
+    - name: Build Wireguard-rs
+      shell: cd /tmp/scripts/wireguard-rs && ~/.cargo/bin/cargo build --release
+    - name: Build Wireguard-rs (fix)
+      shell: cd /tmp/scripts/wireguard-rs && ~/.cargo/bin/cargo fix --bin "wireguard-rs" --allow-dirty
+    - name: Build Tailscale Wireguard-go
+      shell: cd /tmp/scripts/tailscale/wireguard-go && make
+
+# - name: Install BoringTUN on server
+#   hosts: server
+#   remote_user: "{{ username_server }}"
+#   gather_facts: false
+
+#   tasks:
+#     - name: Install boringtun-cli package with cargo
+#       shell: ~/.cargo/bin/cargo install boringtun-cli

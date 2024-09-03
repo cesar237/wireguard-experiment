@@ -1,0 +1,12 @@
+[Interface]
+Address = 192.168.0.1
+PostUp =  iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eno1 -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eno1  -j MASQUERADE
+ListenPort = 51820
+PrivateKey = {{ server_keypairs["1"]["Private Key"] }}
+
+{% for nflow_ in range(1, n_clients+1) %}
+[Peer]
+PublicKey = {{ keypairs[nflow_|string]["Public Key"] }}
+AllowedIPs = 192.168.0.{{ nflow_ + 1 }}
+{% endfor %}

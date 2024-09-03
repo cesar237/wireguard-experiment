@@ -1,0 +1,126 @@
+all:
+  vars:
+    keypairs: "{{ lookup('file', 'keypairs.json') | from_json }}"
+    index: "{{ lookup('file', 'index.json') | from_json }}"
+    target_index: "{{ lookup('file', 'target_index.json') | from_json }}"
+    server_keypairs: "{{ lookup('file', 'server_keypairs.json') | from_json }}"
+    server_address: "{{ hostvars[groups['server'][0]]['ansible_facts']['default_ipv4']['address'] }}"
+    # target_address: "{{ hostvars[groups['target'][0]]['ansible_facts']['default_ipv4']['address'] }}"
+    username_server: root
+    username_client: root
+    username_target: root
+    username: root
+
+    n_clients: 1000
+    runs: 3
+    # Choose testname between TCP_STREAM, TCP_MAERTS (Deprecated)
+    netperf_testname: "TCP_STREAM"
+    latency_test : "TCP_RR" # Or UDP_RR for UDP
+    latency_req_res_size: "1,1500" # default "1,1"
+    batch: 100
+    irqbalanced: true
+    test_latency: true
+    all_on_core_0: False
+    deactivate_rss: false
+
+    iperf_udp: False
+    queue_length: 1024
+    bandwidth: 30M
+    packet_size: 1K # MAX = 1048576 and 1460 for UDP
+
+    bandwidth_varying: False
+    bandwidth_list: 1G 3G 6G 9G 12G 15G 20G 22G 25G
+
+    pinned_napi: True
+    threaded: True
+    hyperthreaded: True
+
+    wg_userspace: false
+    wireguard_go_tailscale: False
+    boringtun: false
+    wireguard_rs: false
+
+    # Configs for Web test (Hey)
+    webserver: nginx # possible values nginx and apache2
+    index_file_size: 100K # Possible values are 1M, 100K, 10K and 1K
+    webserver_test_length: 50s # put time here, 10s or 1m for minutes
+    webserver_nworker: 200
+    index_file_distributed : True # If true, will configure n_1K*n_nodes that will fetch 1K, n_10K*n_nodes that will fetch 10k, etc.
+    n_1K: 25
+    n_10K: 25
+    n_100K: 25
+    n_1M: 25 # sum of n_1K, n_10K n_100K and n_1M must be batch = 100 by default
+
+    test_iperf3: true
+    test_netperf: false
+    test_hey: false
+    test_deathstar: false
+
+    # Choose sched policy: -o for default, -b for batch, -f for fifo and -r for round robin
+    sched_policy: "-b"
+    # Choose sched priority: 0 for default and batch, 1 for fifo and round robin
+    sched_priority: 0
+    apply_sched_policy: false
+    test_irqbalance: false
+    download: true
+    bidirectional: false
+    is_personal: False
+    wg_activated: True
+    limited_bandwidth: false
+    limit_bandwidth: "30mbit"
+    ncore_set: "36"
+    #ncore_set: "7,ffffffff 0,0fffffff 0,0000ffff 0,00000fff 0,000000ff 0,0000000f 0,00000001"
+    nflow_set: "5 10 20 50 80 100"
+    unit_time_s: 40
+    script_path: "/tmp/scripts"
+    results_path: "/tmp/results"
+    ftrace_path: "/sys/kernel/debug/tracing"
+  children:
+    server:
+      hosts:
+        gros-48:
+            ansible_host: gros-48.nancy.grid5000.fr
+    targets:
+      hosts:
+        gros-49:
+            ansible_host: gros-49.nancy.grid5000.fr
+        gros-50:
+            ansible_host: gros-50.nancy.grid5000.fr
+        gros-51:
+            ansible_host: gros-51.nancy.grid5000.fr
+        gros-52:
+            ansible_host: gros-52.nancy.grid5000.fr
+        gros-53:
+            ansible_host: gros-53.nancy.grid5000.fr
+        gros-54:
+            ansible_host: gros-54.nancy.grid5000.fr
+        gros-55:
+            ansible_host: gros-55.nancy.grid5000.fr
+        gros-56:
+            ansible_host: gros-56.nancy.grid5000.fr
+        gros-57:
+            ansible_host: gros-57.nancy.grid5000.fr
+    clients:
+      hosts:
+        gros-58:
+            ansible_host: gros-58.nancy.grid5000.fr
+        gros-59:
+            ansible_host: gros-59.nancy.grid5000.fr
+        gros-61:
+            ansible_host: gros-61.nancy.grid5000.fr
+        gros-62:
+            ansible_host: gros-62.nancy.grid5000.fr
+        gros-68:
+            ansible_host: gros-68.nancy.grid5000.fr
+        gros-7:
+            ansible_host: gros-7.nancy.grid5000.fr
+        gros-8:
+            ansible_host: gros-8.nancy.grid5000.fr
+        gros-82:
+            ansible_host: gros-82.nancy.grid5000.fr
+        gros-84:
+            ansible_host: gros-84.nancy.grid5000.fr
+    wg:
+      children:
+        server:
+        clients:

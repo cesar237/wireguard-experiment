@@ -1,0 +1,9 @@
+---
+- name: Launch test script on server and clients
+  hosts: [server, clients]
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: Launch test script
+      shell: "nohup /tmp/scripts/test.sh >> test.log 2>&1 & "

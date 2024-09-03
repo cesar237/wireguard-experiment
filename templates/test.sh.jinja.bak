@@ -1,0 +1,177 @@
+#! /bin/bash
+# $1 = Number of flows
+# $2 = namedir (for fixed_rates and unfixed_rates)
+
+script_path={{ script_path }}
+results_path={{ results_path }}
+test_duration={{ unit_time_s }}
+irqbalanced={{ irqbalanced }}
+now="date +%H:%M:%S"
+
+# Delete residual data
+rm -r /tmp/results
+rm /tmp/outputs.zip
+rm /tmp/data.zip
+
+# cpupower frequency-set -g performance
+
+# Set all tracers
+#trace-cmd set -p function_graph -l :mod:wireguard --max-graph-depth 1 -e napi -e sched -v -e sched_stat_runtime -b 4000000
+
+{% if all_on_core_0 %}
+echo "Redirecting all interrupts on core 0...."
+first_irq=`cat /proc/interrupts | grep "mlx5_comp0@pci:0000:18:00.0" | awk '{ print $1 }' | tr ':' ' '`
+nr_cpus=`nproc`
+for i in `seq 0 $nr_cpus`; do 
+	echo 0,00000001 > /proc/irq/$(( i + first_irq ))/smp_affinity; 
+done
+echo "Done!"
+{% endif %}
+
+{% if deactivate_rss %}
+echo "Deactivating RSS..."
+ethtool -L eno1 combined 1
+ethtool -K eno1 receive-hashing off
+echo "Done!"
+{% endif %}
+
+ethtool -G eno1 tx {{ queue_length }} rx {{ queue_length }}
+
+{% if irqbalanced %}
+apt install -y irqbalance;
+# irqbalance -t 1 -d > /tmp/results/$n_core/$n_flow/irqbalance.log &
+{% endif %}
+
+#echo off > /sys/devices/system/cpu/smt/control
+#echo on > /sys/devices/system/cpu/smt/control
+
+{% if hyperthreaded %}
+#echo on > /sys/devices/system/cpu/smt/control
+ncore_set="36"
+{% else %}
+echo off > /sys/devices/system/cpu/smt/control
+ncore_set="18 36"
+{% endif %}
+
+dmesg >> kern.logs
+
+echo "[`$now`] Launching tests..."
+for n_core in $ncore_set ; do
+	echo "[`$now`] Test_case: n_core=$n_core"
+	root_path=$results_path;
+	mkdir -p $root_path;
+
+dmesg >> kern.logs
+
+	{% if pinned_napi %}
+	count=0
+	number_of_cpus=`nproc`
+	for pid in `pgrep napi`; do
+		core=$((count % number_of_cpus)); 
+		echo $core,$((core+1))
+		taskset -cp $core,$((core + 1)) $pid
+		count=$((count + 1)); 
+	done
+	{% endif %}
+
+	{% if apply_sched_policy %}
+	for pid in `pgrep wg`; do
+		chrt {{ sched_policy }} -p {{ sched_priority }} $pid
+	done
+	for pid in `pgrep napi`; do
+		chrt {{ sched_policy }} -p {{ sched_priority }} $pid
+	done
+	# chrt {{ sched_policy }} -a {{ sched_priority }}
+	{% endif %}
+
+	dmesg >> kern.logs
+
+	{% if bandwidth_varying %}
+	for bandwidth in {{ bandwidth_list }}; do
+		SECONDS=0
+		start=`date +%S`
+		start_min=`date +%M`
+
+		echo "[`$now`] Test_case: n_flow=$bandwidth"
+		# sleep 20;
+
+		# echo "[`$now`] Launching global_perf test..."
+		# $script_path/wg_test_global_perf.sh $results_path $n_core $bandwidth # 30 secs
+		# echo "[`$now`] Launching global_perf test...Done"
+
+		# echo "[`$now`] Launching trace-printk test..."
+		# $script_path/wg_test_trace_printk.sh $results_path $n_core $bandwidth # 5 secs
+
+		echo "[`$now`] Done!"
+		end=`date +%S`
+		end_min=`date +%M`
+		duration=`bc <<< "( (($end_min - $start_min + 60) % 60 ) * 60 + $end - $start ) "`
+		echo "[`$now`] trace-cmd start at $start_min:$start and end at $end_min:$end, so done in $duration secs. Sleeping for $(( {{ unit_time_s }} - duration ))..."
+		sleep $(( {{ unit_time_s }} - duration ))
+	done
+	{% else %}
+
+
+dmesg >> kern.logs
+
+	for n_flow in {{ nflow_set }}; do
+		SECONDS=0
+		start=`date +%S`
+		start_min=`date +%M`
+
+dmesg >> kern.logs
+		#activate irqbalance
+		mkdir -p /tmp/results/$n_core/$n_flow
+		irqbalance -t 1 -d > /tmp/results/$n_core/$n_flow/irqbalance.log &
+
+dmesg >> kern.logs
+		echo "[`$now`] Test_case: n_flow=$n_flow"
+
+		echo "[`$now`] Launching global_perf test..."
+		sleep 5
+		$script_path/wg_test_global_perf.sh $results_path $n_core $n_flow # 10 secs
+		echo "[`$now`] Launching global_perf test...Done"
+
+		# echo "[`$now`] Launching wg_function_execution_time test..."
+		# $script_path/wg_test_function_execution_time.sh $results_path $n_core $n_flow # 5 secs
+
+		# echo "[`$now`] Launching wg_napi_poll test..."
+		# $script_path/wg_test_rx_poll_analysis.sh $results_path $n_core $n_flow # 10 secs
+
+
+dmesg >> kern.logs
+		# echo "[`$now`] Launching Trace printk test..." 
+		# $script_path/wg_test_trace_printk.sh $results_path $n_core $n_flow # 10 secs
+
+		# sleep 5;
+		# echo "[`$now`] Launching global_perf test..."
+		# $script_path/wg_test_global_perf.sh $results_path $n_core $n_flow # 20 secs
+		# echo "[`$now`] Launching global_perf test...Done"
+
+		# echo "[`$now`] Launching Scheduling events test..."
+		# $script_path/wg_test_scheduler_analysis.sh $results_path $n_core $n_flow # 5 secs
+
+		# echo "[`$now`] Launching wg_decrypt_worker_analysis test..."
+		# $script_path/wg_test_decrypt_worker_analysis.sh $results_path $n_core $n_flow # ~10 secs
+		# echo "[`$now`] Launching wg_tx_worker_analysis test..."
+		# $script_path/wg_test_tx_worker_analysis.sh $results_path $n_core $n_flow # ~10 secs
+
+dmesg >> kern.logs
+		echo "[`$now`] Done!"
+		end=`date +%S`
+		end_min=`date +%M`
+		duration=`bc <<< "( (($end_min - $start_min + 60) % 60 ) * 60 + $end - $start ) "`
+		echo "[`$now`] trace-cmd start at $start_min:$start and end at $end_min:$end, so done in $duration secs. Sleeping for $(( {{ unit_time_s }} - duration ))..."
+		sleep $(( {{ unit_time_s }} - duration ))
+	done
+	{% endif %}
+done
+dmesg >> kern.logs
+
+
+napi_ipv4_to_csv() {
+	echo napi_struct,ip_address
+	dmesg | grep "created!" | awk '{ print $7,$9 }' | tr ' ' ','
+}
+
+napi_ipv4_to_csv > /tmp/napi_client_ip.csv

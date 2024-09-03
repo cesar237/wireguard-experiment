@@ -1,0 +1,45 @@
+#! /bin/bash
+inp=$1
+root=/tmp
+#unzip outputs.zip
+
+mkdir -p cpu network cpuload
+rm -frv final_res
+mkdir -p global
+
+ncore_set="{{ ncore_set }}"
+nflow_set="{{ nflow_set }}"
+
+for cpu in $ncore_set; do
+	for nflow in $nflow_set; do 
+		sadf -d $inp/results/CPU-$cpu/nflow-$nflow/sar/sar.data -- -u ALL -P ALL \
+		| awk 'BEGIN{FS=";"} {USED=100-$14} {print $4,$7,$11,$14,USED}' \
+		| tr ' ' ',' > cpu/cpu-$cpu-$nflow.csv
+
+		sadf -d $inp/results/CPU-$cpu/nflow-$nflow/sar/sar.data -- -n DEV \
+		| awk 'BEGIN{FS=";"} {print $4,$5,$6,$7,$8}' \
+		| tr ' ' ',' > network/network-$cpu-$nflow.csv
+
+		sadf -d $inp/results/CPU-$cpu/nflow-$nflow/sar/sar.data -- -q \
+		| awk 'BEGIN{FS=";"} {print $4}' \
+		| tr ' ' ',' > cpuload/cpuload-$cpu-$nflow.csv
+	done; 
+done
+
+for cpu in $ncore_set; do
+	for flow in $nflow_set; do 
+		$root/median_val.py -i network/network-$cpu-$flow.csv -c $cpu -n $flow -o network/data -f 'IFACE' & 
+		$root/median_val.py -i cpu/cpu-$cpu-$flow.csv -c $cpu -n $flow -o cpu/data -f 'CPU' &
+		$root/median_val.py -i cpuload/cpuload-$cpu-$flow.csv -c $cpu -n $flow -o cpuload/data &
+	done; 
+done
+
+echo "core,sys,softirq,idle,used,ncores,nflows" > cpu/header
+echo "iface,rxpck/s,txpck/s,rxkB/s,txkB/s,ncores,nflows" > network/header
+echo "runq-sz,ncores,nflows" > cpuload/header
+
+cat $root/cpu/header $root/cpu/data_* > global/cpu.csv
+cat $root/network/header $root/network/data_* > global/network.csv
+cat $root/cpuload/header $root/cpuload/data_* > global/cpuload.csv
+
+zip -r /tmp/data.zip /tmp/global

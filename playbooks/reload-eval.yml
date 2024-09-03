@@ -1,0 +1,34 @@
+---
+- name: Kill all unecessary processes 
+  hosts: clients
+  remote_user: "{{ username_client }}"
+  gather_facts: false
+
+  tasks:
+    - name: Killall iperf3 processes
+      shell:
+        cmd: killall -9 iperf3
+      ignore_errors: true
+    - name: Killall netperf processes
+      shell:
+        cmd: killall -9 netperf
+      ignore_errors: true
+
+
+- name: Reload wireguard interfaces on wireguard server 
+  hosts: server
+  remote_user: "{{ username_server }}"
+  gather_facts: false
+
+  tasks:
+    - name: Remove current Wireguard module
+      shell:
+        cmd: rmmod wireguard
+      ignore_errors: true
+    - name: Install new Wireguard module
+      shell:
+        cmd: insmod /lib/modules/6.1.90/kernel/drivers/net/wireguard/wireguard.ko
+      ignore_errors: true
+    - name: Activate Wireguard conf
+      shell: /tmp/scripts/activate_wg.sh
+

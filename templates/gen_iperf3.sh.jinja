@@ -1,0 +1,29 @@
+#! /usr/bin/bash
+
+script_path={{ script_path }}
+results_path={{ results_path }}
+nflow_index={{ index[ansible_hostname] }}
+offset={{ (index[ansible_hostname] - 1)*batch }}
+
+n_clients={{ n_clients }}
+now="date +%H:%M:%S"
+# echo "Activate Wireguard interface"
+# for i in `ls ~/confs`; do wg-quick up ~/confs/$i ; done
+# /tmp/scripts/limit_bandwidth.sh
+
+n_flow={{ unit_flow }}
+
+pre_heat=5
+sleep $pre_heat
+# sleep $(( {{ index[ansible_hostname] * 0.5 }} ))
+echo [`$now`] Starting netperf of $n_flow clients...
+for i in `seq 1 $n_flow`; do
+	ip_addr=`ifconfig wg-$i | head -2 | tail -1 | awk '{print $2}'`
+	iperf3 -c {{ target_index[ansible_hostname] }} -b {{ bandwidth }} -l {{ packet_size }} $udp_test -p $(( 12865 + $i - 1 )) -t 0  -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
+done
+mkdir sar
+cd sar
+rm -f sar.data
+sar -A -o sar.data 1 $(( {{ unit_time_s }} - pre_heat )) > /dev/null
+killall -s SIGINT iperf3
+cd ..

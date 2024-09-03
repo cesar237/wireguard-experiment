@@ -1,0 +1,29 @@
+#! /bin/bash
+results_path={{ results_path }}
+script_path={{ script_path }}
+
+cd $results_path
+
+# for cpu in `ls`; do
+# 	for nflow in `ls $cpu`; do 
+# 		$script_path/retrieve_sar.sh $cpu/$nflow/sar
+# 		# $script_path/retrieve_trace.sh $cpu/$nflow/trace
+# 		# $script_path/retrieve_poll.sh $cpu/$nflow/rx_poll &
+# 	done;
+# done;
+
+# We are sure here that all tasks are done
+# echo "Aggregating the sar data..."
+# cd $results_path
+# mkdir -p final_res
+# python3 $script_path/convert_to_csv.py -c {{ ncore_set }} -n {{ nflow_set }} -d $results_path -w
+# echo "Done!"
+
+cd /tmp
+chmod +x analyse.sh median_val.py
+./analyse.sh .
+./analyse.sh .
+
+echo "Zipping results"
+cd /tmp
+zip -r outputs.zip results/
