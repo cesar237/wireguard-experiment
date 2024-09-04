@@ -1,6 +1,14 @@
 ---
 all:
   vars:
+    ncore_set: "36"
+    nflow_set: "1 10 30 50 80 100"
+    unit_time_s: 65
+
+    # ncore_set: "36"
+    # nflow_set: "1 2 5 10 15 20"
+    # unit_time_s: 65
+
     # Testing type choice
     test_iperf3: true
     test_netperf: true
