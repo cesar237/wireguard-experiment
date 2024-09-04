@@ -17,10 +17,6 @@ all:
     limited_bandwidth: false
     limit_bandwidth: 30mbit
 
-    ncore_set: "36"
-    nflow_set: "1 2 10 40 50 80 100"
-    unit_time_s: 70
-
     bandwidth_varying: False
     bandwidth_list: 1G 3G 6G 9G 12G 15G 20G 22G 25G
     wg_activated: True

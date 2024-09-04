@@ -1,9 +1,45 @@
 ---
+- name: Resend test script of server
+  hosts: server
+  remote_user: "{{ username }}"
+  gather_facts: true
+
+  tasks:
+    - name: Send test.sh script
+      template:
+        src: ../templates/test.sh.jinja
+        dest: /tmp/scripts/test.sh
+
+- name: Resend test script to clients
+  hosts: clients
+  remote_user: "{{ username }}"
+  gather_facts: true
+
+  tasks:
+    - name: Send client generator script
+      template:
+        src: ../templates/client_gen.sh.jinja
+        dest: /tmp/scripts/test.sh
+  
+- name: Resend test script to targets
+  hosts: targets
+  remote_user: "{{ username }}"
+  gather_facts: true
+
+  tasks:
+    - name: Send netserver launcher
+      template:
+        src: ../templates/launch_netserver.sh.jinja
+        dest: /tmp/scripts/test.sh
+
 - name: Launch test script on server and clients
   hosts: [server, clients]
   remote_user: "{{ username }}"
   gather_facts: false
 
   tasks:
+    - name: Make all scripts executable
+      shell:
+        cmd: chmod +x -R /tmp/scripts
     - name: Launch test script
       shell: "nohup /tmp/scripts/test.sh >> test.log 2>&1 & "

@@ -96,10 +96,6 @@
   gather_facts: false
 
   tasks:
-    # - name: Send wg_client.conf
-    #   template:
-    #     src: ../templates/wg_client.conf.jinja
-    #     dest: wg.conf
     - name: Send median_val.py         
       copy:
         src: ../templates/median_val.py
