@@ -16,3 +16,5 @@ export NODEFILE=$data_dir/NODES
 export server=`cat $SERVERFILE`
 export targets=`cat $TARGETFILE`
 export clients=`cat $CLIENTFILE`
+
+export JOB_ID=`cat $data_dir/JOB_ID`
