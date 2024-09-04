@@ -3,3 +3,5 @@ EXPERIMENT_DATA/*
 wireguard-artefacts/*
 inventory/hosts.yaml
 results/*
+static/index.json
+static/target_index.json
