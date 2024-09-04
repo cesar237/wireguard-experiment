@@ -12,14 +12,14 @@ mkdir -p $res_dir/clients
 mkdir -p $res_dir/server
 
 # Retreive results from server
-rsync -zvr root@$server:/tmp/results.tar.zst $res_dir/server/results.tar.zst
+scp root@$server:/tmp/results.tar.zst $res_dir/server/results.tar.zst
 
 # Retreive results from clients
 # echo $clients
 for node in $clients; do
-    name=`echo $node | cut -d. -f1`
-    mkdir -p $res_dir/clients/$name
-    rsync -zvr root@$name:/tmp/results.tar.zst $res_dir/clients/$name/results.tar.zst
+    name=`echo $node | cut -d. -f1` \
+        && mkdir -p $res_dir/clients/$name \
+        && scp root@$name:/tmp/results.tar.zst $res_dir/clients/$name/results.tar.zst
 done
 
 # Copy Experiment metadata in result directory
