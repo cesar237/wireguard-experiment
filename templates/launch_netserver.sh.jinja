@@ -1,6 +1,6 @@
 for i in `seq 0 {{ batch }}`; do
         echo Launching netserver on port $(( 15865 + i + 1 ))
-        netserver -p $(( 13865 + i + 1 )) > /dev/null
+        netserver -p $(( 15865 + i + 1 )) > /dev/null
         echo Launching iperf3 on port $(( 12865 + i + 1 ))
         iperf3 -s -p $(( 12865 + i + 1 )) -D
 done
