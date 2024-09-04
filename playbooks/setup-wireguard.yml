@@ -1,30 +1,32 @@
 ---
 - name: "Generate conf files for server"
   hosts: server
+  remote_user: "{{ username }}"
   tasks:
     - name: run wg_gen.py script for server config generation
       shell: | 
         /tmp/scripts/wg_gen.py \
-          -k keypairs.json \
+          -k /root/keypairs.json \
           -b {{ batch }} \
-          -s server_keypairs.json \ 
+          -s /root/server_keypairs.json \ 
           -n {{ n_clients }} \
-          -o confs \
+          -o /root/confs \
           {% if is_personal %} -m {% endif %} \
           {% if wg_userspace %} -u {% endif %}
 
 - name: "Generate conf files for server"
   hosts: clients
+  remote_user: "{{ username }}"
   tasks:
     - name: Generate conf files for clients
       shell: |
         /tmp/scripts/wg_gen.py \
-          -k keypairs.json \
-          -s server_keypairs.json \
+          -k /root/keypairs.json \
+          -s /root/server_keypairs.json \
           -n {{ batch }} \
           -i {{ index[ansible_nodename] }} \
           {% if is_personal %} -m {% endif %} \
-          -o confs \
+          -o /root/confs \
           -d {{ server_address }}
   
 - name: Activate wireguard interfaces on wireguard clients 

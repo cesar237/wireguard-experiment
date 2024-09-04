@@ -8,6 +8,15 @@
       shell:
         cmd: sysctl net.ipv4.ip_forward=1
 
+- name: Launch http server on targets
+  hosts: targets
+  remote_user: "{{ username_server }}"
+  gather_facts: true
+  tasks:
+    - name: Initialize server's network configuration
+      shell:
+        cmd: /tmp/scripts/init_server.sh
+      ignore_errors: true
 
 - name: Apply necessary network configuration on clients 
   hosts: clients
@@ -22,16 +31,6 @@
     - name: Enable Ipv4 forwarding
       shell:
         cmd: sysctl net.ipv4.ip_forward=1
-
-- name: Launch http server on targets
-  hosts: targets
-  remote_user: "{{ username_server }}"
-  gather_facts: false
-  tasks:
-    - name: Initialize server's network configuration
-      shell:
-        cmd: /tmp/scripts/init_server.sh
-      ignore_errors: true
 
 - name: Limit bandwidth on clients
   hosts: clients

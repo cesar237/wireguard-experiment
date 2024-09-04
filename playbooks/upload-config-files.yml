@@ -49,10 +49,6 @@
       copy:
         src: ../templates/decrypt.parser.py
         dest: /tmp/scripts/decrypt.parser.py
-    - name: Send init_server.sh script
-      copy:
-        src: ../templates/init_server.sh
-        dest: /tmp/scripts/init_server.sh
     - name: Send perf.parser.py
       copy:
         src: ../templates/perf.parser.py
@@ -150,6 +146,14 @@
       template:
         src: ../templates/launch_netserver.sh.jinja
         dest: /tmp/scripts/test.sh
+    - name: Send init_server.sh script
+      copy:
+        src: ../templates/init_server.sh
+        dest: /tmp/scripts/init_server.sh
+    - name: Send TARGETS list
+      copy:
+        src: ../EXPERIMENT_DATA/TARGETS
+        dest: /tmp/scripts/TARGETS
     - name: Send NWEB lightweight http server
       copy:
         src: ../templates/nweb
@@ -172,3 +176,4 @@
         dest: /var/www/html/file_1K.html
     - name: Make all scripts executable
       shell: chmod +x -R /tmp/scripts
+    
