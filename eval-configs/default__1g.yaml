@@ -10,8 +10,6 @@ all:
     # Network Configuration
     download: false
     bidirectional: false
-    limited_bandwidth: True
-    limit_bandwidth: "30mbit"
 
     # NETPERF args 
     netperf_testname: "TCP_STREAM" # type: TCP_STREAM, TCP_MAERTS
