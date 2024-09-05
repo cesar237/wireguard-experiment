@@ -39,8 +39,8 @@ all:
     # NAPI/KTHREAD/WQ/SMT config
     pinned_napi: False
     threaded: 0
-    hyperthreaded: True
-    smt: "on"
+    hyperthreaded: false
+    smt: "off"
 
     # Wireguard type choice
     wg_userspace: false

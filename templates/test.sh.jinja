@@ -46,9 +46,8 @@ service irqbalance stop;
 ncore_set="36"
 {% else %}
 ncore_set="18 36"
-{% endif %}
-
 echo {{ smt }} > /sys/devices/system/cpu/smt/control
+{% endif %}
 
 echo {{ threaded }} > /sys/class/net/wg/threaded
 
@@ -88,6 +87,12 @@ for n_core in $ncore_set ; do
 	echo "[`$now`] Test_case: n_core=$n_core"
 	root_path=$results_path;
 	mkdir -p $root_path;
+
+	if [ "$n_core" -eq "18" ]; then
+		echo off > /sys/devices/system/cpu/smt/control
+	else
+		echo on > /sys/devices/system/cpu/smt/control
+	fi
 
 	for n_flow in {{ nflow_set }}; do
 		SECONDS=0

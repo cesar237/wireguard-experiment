@@ -1,31 +1,31 @@
 ---
 server:
   hosts:
-    gros-64.nancy.grid5000.fr:
+    gros-101.nancy.grid5000.fr:
 targets:
   hosts:
-    gros-7.nancy.grid5000.fr:
-    gros-73.nancy.grid5000.fr:
-    gros-74.nancy.grid5000.fr:
-    gros-76.nancy.grid5000.fr:
-    gros-77.nancy.grid5000.fr:
-    gros-78.nancy.grid5000.fr:
-    gros-79.nancy.grid5000.fr:
-    gros-80.nancy.grid5000.fr:
-    gros-83.nancy.grid5000.fr:
-    gros-85.nancy.grid5000.fr:
+    gros-103.nancy.grid5000.fr:
+    gros-107.nancy.grid5000.fr:
+    gros-108.nancy.grid5000.fr:
+    gros-111.nancy.grid5000.fr:
+    gros-114.nancy.grid5000.fr:
+    gros-121.nancy.grid5000.fr:
+    gros-43.nancy.grid5000.fr:
+    gros-44.nancy.grid5000.fr:
+    gros-53.nancy.grid5000.fr:
+    gros-66.nancy.grid5000.fr:
 clients:
   hosts:
-    gros-86.nancy.grid5000.fr:
-    gros-88.nancy.grid5000.fr:
-    gros-89.nancy.grid5000.fr:
-    gros-9.nancy.grid5000.fr:
-    gros-93.nancy.grid5000.fr:
-    gros-94.nancy.grid5000.fr:
-    gros-95.nancy.grid5000.fr:
-    gros-97.nancy.grid5000.fr:
-    gros-98.nancy.grid5000.fr:
-    gros-99.nancy.grid5000.fr:
+    gros-67.nancy.grid5000.fr:
+    gros-68.nancy.grid5000.fr:
+    gros-69.nancy.grid5000.fr:
+    gros-7.nancy.grid5000.fr:
+    gros-70.nancy.grid5000.fr:
+    gros-71.nancy.grid5000.fr:
+    gros-73.nancy.grid5000.fr:
+    gros-74.nancy.grid5000.fr:
+    gros-75.nancy.grid5000.fr:
+    gros-76.nancy.grid5000.fr:
 wg:
   children:
     server:
