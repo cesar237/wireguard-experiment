@@ -17,3 +17,6 @@ kaenv3 debian12-nfs > $data_dir/OS_ENV.yaml
 
 # Deploy the same env on all machines
 kadeploy3 $OS $(ka_machine_args $JOB_ID)
+
+# Initialize testenv
+$script_dir/initialize_testenv.sh
