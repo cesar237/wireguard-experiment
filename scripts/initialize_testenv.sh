@@ -34,4 +34,4 @@ fi
 
 export PATH=$PATH:/home/hmounah/.local/bin
 
-. $ROOT/.bashrc
+. ~/.bashrc
