@@ -8,6 +8,7 @@ export static_dir=$ROOT/static
 export inventory_dir=$ROOT/inventory
 export archive_dir=$ROOT/wireguard-artefacts
 export config_dir=$ROOT/eval-configs
+export res_dir=$ROOT/results
 
 export CLIENTFILE=$data_dir/CLIENTS
 export TARGETFILE=$data_dir/TARGETS
@@ -43,4 +44,10 @@ function sleep_progress() {
         sleep 1
     done
     echo
+}
+
+function list_done_tests() {
+    for i in `ls $res_dir`; do
+        cat $res_dir/$i/EXPERIMENT_DATA/TEST_CONFIG
+    done
 }
