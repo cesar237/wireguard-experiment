@@ -68,7 +68,7 @@ for n_core in $ncore_set ; do
 			{% if wg_activated %}
 			ip_addr=`ifconfig wg-$i | head -2 | tail -1 | awk '{print $2}'`
 			{% else %}
-			ip_addr=`ifconfig eno1 | head -2 | tail -1 | awk '{print $2}'`
+			ip_addr=`ifconfig {{ iface }} | head -2 | tail -1 | awk '{print $2}'`
 			{% endif %}
 			iperf3 -c {{ target_index[ansible_nodename] }} -b {{ bandwidth }} -l {{ packet_size }}  -p $(( 12865 + $i )) -t 0 -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
 			# netperf -H {{ target_index[ansible_nodename] }} -t TCP_MAERTS -L $ip_addr -l {{ unit_time_s }} -D 1 -f m -p $(( 13865 + $i )) > netperf_$i.log &

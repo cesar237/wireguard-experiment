@@ -6,8 +6,8 @@ import os
 template = """
 [Interface]
 Address = {}
-PostUp =  iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eno1 -j MASQUERADE; ip rule add from {} lookup {}
-PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eno1  -j MASQUERADE; ip rule add from {} lookup {}
+PostUp =  iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ iface }} -j MASQUERADE; ip rule add from {} lookup {}
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o {{ iface }}  -j MASQUERADE; ip rule add from {} lookup {}
 ListenPort = {}
 PrivateKey = {}
 Table = {}

@@ -1,7 +1,7 @@
 [Interface]
 Address = 192.168.0.1
-PostUp =  iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eno1 -j MASQUERADE
-PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eno1  -j MASQUERADE
+PostUp =  iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ iface }} -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o {{ iface }}  -j MASQUERADE
 ListenPort = 51820
 PrivateKey = {{ server_keypairs["1"]["Private Key"] }}
 

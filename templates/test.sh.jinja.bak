@@ -30,12 +30,12 @@ echo "Done!"
 
 {% if deactivate_rss %}
 echo "Deactivating RSS..."
-ethtool -L eno1 combined 1
-ethtool -K eno1 receive-hashing off
+ethtool -L {{ iface }} combined 1
+ethtool -K {{ iface }} receive-hashing off
 echo "Done!"
 {% endif %}
 
-ethtool -G eno1 tx {{ queue_length }} rx {{ queue_length }}
+ethtool -G {{ iface }} tx {{ queue_length }} rx {{ queue_length }}
 
 {% if irqbalanced %}
 apt install -y irqbalance;

@@ -25,7 +25,7 @@ for addr in $addr_list; do
 done
 
 nohup iptables -A FORWARD -i wg -j ACCEPT
-nohup iptables -t nat -A POSTROUTING -o eno1 -j MASQUERADE 
+nohup iptables -t nat -A POSTROUTING -o {{ iface }} -j MASQUERADE 
 {% else %}
 for i in `ls confs`; do 
     nohup wg-quick up confs/$i ; 

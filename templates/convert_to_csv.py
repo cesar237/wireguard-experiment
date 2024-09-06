@@ -197,7 +197,7 @@ def generate_one_csv(kwarg):
     data.to_csv(f"final_res/cpu_{core}_{nflow}.csv", index=False, encoding='utf-8')
     data, data_std = serialize_sar(sar_memory, ["kbmemused", "kbmemfree", "%memused", "%commit"], core, nflow)
     data.to_csv(f"final_res/memory_{core}_{nflow}.csv", index=False, encoding='utf-8')
-    data = get_network_data(sar_network, "eno1", "wg", core, nflow)
+    data = get_network_data(sar_network, "{{ iface }}", "wg", core, nflow)
     data.to_csv(f"final_res/network_{core}_{nflow}.csv", index=False, encoding='utf-8')
     #perf_data = read_perf_csv(core, nflow)
     #data, units = get_perf_data(perf_data, core, nflow)

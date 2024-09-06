@@ -10,75 +10,75 @@
         src: ../templates/activate_wg.sh.jinja
         dest: /tmp/scripts/activate_wg.sh
     - name: Send client keypairs         
-      copy:
+      template:
         src: ../static/keypairs.json
         dest: keypairs.json
     - name: Send median_val.py         
-      copy:
+      template:
         src: ../templates/median_val.py
         dest: /tmp/median_val.py                    
     - name: Send server keypairs         
-      copy:
+      template:
         src: ../static/server_keypairs.json          
         dest: server_keypairs.json
     - name: Send convert_to_csv script
-      copy:
+      template:
         src: ../templates/convert_to_csv.py
         dest: /tmp/scripts/convert_to_csv.py
     - name: Send requirements for convert_to_csv script
-      copy:
+      template:
         src: ../templates/requirements.txt
         dest: /tmp/scripts/requirements.txt
     - name: Send cpu_set.sh
-      copy:
+      template:
         src: ../templates/cpu_set.sh
         dest: /tmp/scripts/cpu_set.sh
     - name: Send wireguard conf generator
-      copy:
+      template:
         src: ../templates/wg_gen_server_conf.py
         dest: /tmp/scripts/wg_gen.py
     - name: Send trace.parser.py
-      copy:
+      template:
         src: ../templates/trace.parser.py
         dest: /tmp/scripts/trace.parser.py
     - name: Send poll parser
-      copy:
+      template:
         src: ../templates/poll.parser.py
         dest: /tmp/scripts/poll.parser.py
     - name: Send decrypt.parser.py
-      copy:
+      template:
         src: ../templates/decrypt.parser.py
         dest: /tmp/scripts/decrypt.parser.py
     - name: Send perf.parser.py
-      copy:
+      template:
         src: ../templates/perf.parser.py
         dest: /tmp/scripts/perf.parser.py
     - name: Send wg_test_decrypt_worker_analysis.sh
-      copy:
+      template:
         src: ../templates/wg_test_decrypt_worker_analysis.sh
         dest: /tmp/scripts/wg_test_decrypt_worker_analysis.sh
     - name: Send wg_test_tx_worker_analysis.sh
-      copy:
+      template:
         src: ../templates/wg_test_tx_worker_analysis.sh
         dest: /tmp/scripts/wg_test_tx_worker_analysis.sh
     - name: Send wg_test_scheduler_analysis.sh
-      copy:
+      template:
         src: ../templates/wg_test_scheduler_analysis.sh
         dest: /tmp/scripts/wg_test_scheduler_analysis.sh
     - name: Send rx poll test
-      copy:
+      template:
         src: ../templates/wg_test_rx_poll_analysis.sh
         dest: /tmp/scripts/wg_test_rx_poll_analysis.sh
     - name: Send wg_test_function_execution_time.sh
-      copy:
+      template:
         src: ../templates/wg_test_function_execution_time.sh
         dest: /tmp/scripts/wg_test_function_execution_time.sh
     - name: Send wg_test_trace_printk.sh
-      copy:
+      template:
         src: ../templates/wg_test_trace_printk.sh
         dest: /tmp/scripts/wg_test_trace_printk.sh
     - name: Send wg_test_global_perf.sh
-      copy:
+      template:
         src: ../templates/wg_test_global_perf.sh
         dest: /tmp/scripts/wg_test_global_perf.sh
     - name: Send test.sh script
@@ -97,15 +97,15 @@
 
   tasks:
     - name: Send median_val.py         
-      copy:
+      template:
         src: ../templates/median_val.py
         dest: /tmp/median_val.py     
     - name: Send client keypairs
-      copy:
+      template:
         src: ../static/keypairs.json
         dest: keypairs.json
     - name: Send server keypairs
-      copy:
+      template:
         src: ../static/server_keypairs.json
         dest: server_keypairs.json
     - name: Send client generator script
@@ -117,15 +117,15 @@
         src: ../templates/limit_bandwidth.sh.jinja
         dest: /tmp/scripts/limit_bandwidth.sh
     - name: Send unlimit_bandwidth script
-      copy:
+      template:
         src: ../templates/unlimit_bandwidth.sh
         dest: /tmp/scripts/unlimit_bandwidth.sh
     - name: Send HEY script
-      copy:
+      template:
         src: ../templates/hey_linux_amd64
         dest: /tmp/scripts/hey_linux_amd64
     - name: Send wireguard conf generator
-      copy:
+      template:
         src: ../templates/wg_gen_client_conf.py
         dest: /tmp/scripts/wg_gen.py
     - name: Make all scripts executable
@@ -143,31 +143,31 @@
         src: ../templates/launch_netserver.sh.jinja
         dest: /tmp/scripts/test.sh
     - name: Send init_server.sh script
-      copy:
+      template:
         src: ../templates/init_server.sh
         dest: /tmp/scripts/init_server.sh
     - name: Send TARGETS list
-      copy:
+      template:
         src: ../EXPERIMENT_DATA/TARGETS
         dest: /tmp/scripts/TARGETS
     - name: Send NWEB lightweight http server
-      copy:
+      template:
         src: ../templates/nweb
         dest: /tmp/scripts/nweb
     - name: Send Index file of 1M
-      copy:
+      template:
         src: ../templates/index.html.1M
         dest: /var/www/html/file_1M.html
     - name: Send Index file of 100K
-      copy:
+      template:
         src: ../templates/index.html.100K
         dest: /var/www/html/file_100K.html
     - name: Send Index file of 10K
-      copy:
+      template:
         src: ../templates/index.html.10K
         dest: /var/www/html/file_10K.html
     - name: Send Index file of 1K
-      copy:
+      template:
         src: ../templates/index.html.1K
         dest: /var/www/html/file_1K.html
     - name: Make all scripts executable

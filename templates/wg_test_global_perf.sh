@@ -16,7 +16,7 @@ cd $res_path
 #for i in `seq 1 6000`; do
 #    touch ethtool.log
 #    echo [`$now`] >> ethtool.log
-#    ethtool -S eno1 | egrep "rx([0-9]+)_(packets|bytes)" >> ethtool.data
+#    ethtool -S {{ iface }} | egrep "rx([0-9]+)_(packets|bytes)" >> ethtool.data
 #    sleep 0.001
 #done
 
@@ -31,7 +31,7 @@ cd $res_path
 #     # touch ethtool.log
 #     # echo [`$now`] >> ethtool.log
 #     head -n $lines /proc/stat >> cpustat.data
-#     # ethtool -S eno1 | egrep "rx([0-9]+)_(packets|bytes)" >> ethtool.data
+#     # ethtool -S {{ iface }} | egrep "rx([0-9]+)_(packets|bytes)" >> ethtool.data
 #     sleep 0.01
 # done
 # cat /proc/interrupts > mappings.csv
@@ -45,7 +45,7 @@ cd $res_path
 #     # touch ethtool.log
 #     # echo [`$now`] >> ethtool.log
 #     head -n $lines /proc/interrupts >> interrupts.data
-#     # ethtool -S eno1 | egrep "rx([0-9]+)_(packets|bytes)" >> ethtool.data
+#     # ethtool -S {{ iface }} | egrep "rx([0-9]+)_(packets|bytes)" >> ethtool.data
 #     sleep 0.01
 # done
 # # cat /proc/interrupts > mappings.csv
@@ -63,7 +63,7 @@ cd ..
 # echo "rx_packets,tx_packets,tx_packets_phy,rx_packets_phy" > packets.csv
 # duration=1
 # while [[ $duration -le 10 ]]; do 
-# 	ethtool -S eno1 \
+# 	ethtool -S {{ iface }} \
 # 	| grep \[r\|t\]x_packets \
 # 	| tr ":" " " \
 # 	| awk '{ print $1,$2 }' \

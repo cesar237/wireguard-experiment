@@ -14,8 +14,8 @@ touch $data_dir/CURRENT_EXP
 for config in $config_list; do
     echo $config > $data_dir/CURRENT_EXP
 
-    done=$(list_done_tests | grep $config$)
-    if [ -z "$done"]; then
+
+    if [ -n "$(list_done_tests | grep $config$)" ]; then
         echo $config already evaluated. Skipping...
     else
 
