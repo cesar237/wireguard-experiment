@@ -59,9 +59,8 @@ for n_core in $ncore_set ; do
 		mkdir -p $mod-$n_flow
 		cd $mod-$n_flow
 
-		# {% if test_iperf3 %}
 		# killall iperf3
-		pre_heat=4
+		pre_heat=3
 		sleep $pre_heat
 		# sleep $(( {{ index[ansible_nodename] * 0.5 }} ))
 		echo [`$now`] Starting netperf of $n_flow clients...
@@ -83,8 +82,6 @@ for n_core in $ncore_set ; do
 		killall -s SIGINT iperf3
 		killall -s SIGINT netperf
 		cd ..
-		# {% endif %}
-
 		echo [`$now`] Done!
 		cd ..
 		last=$n_flow
@@ -96,7 +93,7 @@ for n_core in $ncore_set ; do
 	killall netperf
 done
 
-cd /tmp/results
+cd ..
 
 done
 
