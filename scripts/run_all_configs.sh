@@ -8,13 +8,26 @@ WAIT_TIME=$(( 65 * 6 * 2 * 3 ))
 
 now="date +%H:%M:%S"
 
-for config in $config_list; do
-    echo "[$($now)] Starting Eval for configuration: $config..."
-    $script_dir/run_playbook.sh start-eval $config
-    sleep_progress $WAIT_TIME
-    echo "[$($now)] Test Finished!"
+touch $data_dir/DONE_EXP
+touch $data_dir/CURRENT_EXP
 
-    echo "[$($now)] Retrieving all results for $config..."
-    $script_dir/retrieve-results.sh
-    echo "[$($now)] Results retrieved!"
+for config in $config_list; do
+    echo $config > $data_dir/CURRENT_EXP
+
+    done=$(cat $data_dir/DONE_EXP | grep $config)
+    if [ -z "$done"]; then
+        echo $config already evaluated. Skipping...
+    else
+
+        echo "[$($now)] Starting Eval for configuration: $config..."
+        $script_dir/run_playbook.sh start-eval $config
+        sleep_progress $WAIT_TIME
+        echo "[$($now)] Test Finished!"
+
+        echo "[$($now)] Retrieving all results for $config..."
+        $script_dir/retrieve-results.sh
+        echo "[$($now)] Results retrieved!"
+
+        echo "$config" >> $data_dir/DONE_EXP
+    fi
 done
