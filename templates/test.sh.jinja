@@ -30,6 +30,11 @@ echo "Deactivating RSS..."
 ethtool -L eno1 combined 1
 ethtool -K eno1 receive-hashing off
 echo "Done!"
+{% else %}
+echo "Activating RSS..."
+ethtool -L eno1 combined 36
+ethtool -K eno1 receive-hashing on
+echo "Done!"
 {% endif %}
 
 ethtool -G eno1 tx {{ queue_length }} rx {{ queue_length }}
