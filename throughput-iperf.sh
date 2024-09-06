@@ -24,9 +24,9 @@ for run in `ls`; do
 
             for node in `seq 1 $nflow`; do
                 tail -n +4 $run/$cpu/$flow/iperf3-$node.log \
-                    | head -n -5 \
-                    | awk -v cpu=$ncpu -v flow=$nflow -v run=$nrun -v node=$node '{ print cpu,flow,node,run,$5,$7,$9,$10 }' \
-                    | tr ' ' ','
+                        | head -n -5 \
+                        | awk -v cpu=$ncpu -v flow=$nflow -v run=$nrun -v node=$node '{ print cpu,flow,node,run,$5,$7,$9,$10 }' \
+                        | tr ' ' ','
             done
         done
     done

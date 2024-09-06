@@ -9,22 +9,27 @@ else
 fi
 curr=`pwd`
 
-cd $run_dir
+cd $run_dir/results
 
-echo "cpu,client,core,usr,kernel,softirq,idle"
+echo "cpu,client,run,core,usr,kernel,softirq,idle"
 
-for cpu in $(ls | grep CPU); do
-    ncpu=$(echo $cpu | cut -d "-" -f 2)
+for run in $(ls); do
+    nrun=$(echo $run | cut -d- -f2)
 
-    for flow in $(ls $cpu); do
-        nflow=$(echo $flow | cut -d "-" -f 2)
+    for cpu in $(ls $run | grep CPU); do
+        ncpu=$(echo $run/$cpu | cut -d "-" -f 3)
 
-        sadf -d $cpu/$flow/sar/sar.data -- -u ALL -P ALL \
-        | tail -n +2 \
-        | awk -v cpu=$ncpu -v flow=$nflow 'BEGIN{FS=";"} {print cpu,flow,$4,$5,$7,$11,$14}' \
-        | tr ',' '.' \
-        | tr ' ' ','
+        for flow in $(ls $run/$cpu); do
+            nflow=$(echo $flow | cut -d "-" -f 2)
+
+            sadf -d $run/$cpu/$flow/sar/sar.data -- -u ALL -P ALL \
+            | tail -n +2 \
+            | awk -v cpu=$ncpu -v flow=$nflow -v run=$nrun 'BEGIN{FS=";"} {print cpu,flow,run,$4,$5,$7,$11,$14}' \
+            | tr ',' '.' \
+            | tr ' ' ','
+        done
     done
+
 done
 
 cd $curr

@@ -9,22 +9,26 @@ else
 fi
 curr=`pwd`
 
-cd $run_dir
+cd $run_dir/results
 
-echo "cpu,client,iface,rxpck/s,txpck/s,rxkB/s,txkB/s"
+echo "cpu,client,run,iface,rxpck/s,txpck/s,rxkB/s,txkB/s"
 
 
-for cpu in $(ls | grep CPU); do
-    ncpu=$(echo $cpu | cut -d "-" -f 2)
+for run in $(ls); do
+    nrun=$(echo $run | cut -d- -f2)
 
-    for flow in $(ls $cpu); do
-        nflow=$(echo $flow | cut -d "-" -f 2)
+    for cpu in $(ls $run | grep CPU); do
+        ncpu=$(echo $run/$cpu | cut -d "-" -f3)
 
-        sadf -d $cpu/$flow/sar/sar.data -- -n DEV \
-            | tail -n +2 \
-            | awk -v cpu=$ncpu -v flow=$nflow 'BEGIN{FS=";"} {print cpu,flow,$4,$5,$6,$7,$8}' \
-            | tr ',' '.' \
-            | tr ' ' ','
+        for flow in $(ls $run/$cpu); do
+            nflow=$(echo $flow | cut -d "-" -f 2)
+
+            sadf -d $run/$cpu/$flow/sar/sar.data -- -n DEV \
+                | tail -n +2 \
+                | awk -v cpu=$ncpu -v flow=$nflow -v run=$nrun 'BEGIN{FS=";"} {print cpu,flow,run,$4,$5,$6,$7,$8}' \
+                | tr ',' '.' \
+                | tr ' ' ','
+        done
     done
 done
 
