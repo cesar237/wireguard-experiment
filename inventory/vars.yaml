@@ -10,7 +10,7 @@ all:
     username_client: root
     username_target: root
     username: root
-    iface: enp1s10f0
+    iface: eno1
     n_clients: 1000
     runs: 3
     batch: 100

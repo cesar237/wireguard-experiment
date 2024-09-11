@@ -17,8 +17,6 @@ wg setconf wg confs/wg.conf
 nohup ip l set mtu 1420 up dev wg 
 nohup ip addr add 192.168.0.1 dev wg
 
-
-
 addr_list=`while read line; do if [[ $line == AllowedIP* ]]; then echo $line; fi; done < confs/wg.conf | tr '=' ' ' | awk '{ print $2 }'`;
 for addr in $addr_list; do
     nohup ip -4 route add $addr/32 dev wg

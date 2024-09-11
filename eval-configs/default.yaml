@@ -44,7 +44,7 @@ all:
 
     # Wireguard type choice
     wg_userspace: false
-    wireguard_go_tailscale: False
+    wireguard_go_tailscale: True
     boringtun: false
     wireguard_rs: false
 

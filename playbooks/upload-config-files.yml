@@ -120,10 +120,10 @@
       template:
         src: ../templates/unlimit_bandwidth.sh
         dest: /tmp/scripts/unlimit_bandwidth.sh
-    - name: Send HEY script
-      template:
-        src: ../templates/hey_linux_amd64
-        dest: /tmp/scripts/hey_linux_amd64
+    # - name: Send HEY script
+    #   template:
+    #     src: ../templates/hey_linux_amd64
+    #     dest: /tmp/scripts/hey_linux_amd64
     - name: Send wireguard conf generator
       template:
         src: ../templates/wg_gen_client_conf.py
@@ -150,26 +150,26 @@
       template:
         src: ../EXPERIMENT_DATA/TARGETS
         dest: /tmp/scripts/TARGETS
-    - name: Send NWEB lightweight http server
-      template:
-        src: ../templates/nweb
-        dest: /tmp/scripts/nweb
-    - name: Send Index file of 1M
-      template:
-        src: ../templates/index.html.1M
-        dest: /var/www/html/file_1M.html
-    - name: Send Index file of 100K
-      template:
-        src: ../templates/index.html.100K
-        dest: /var/www/html/file_100K.html
-    - name: Send Index file of 10K
-      template:
-        src: ../templates/index.html.10K
-        dest: /var/www/html/file_10K.html
-    - name: Send Index file of 1K
-      template:
-        src: ../templates/index.html.1K
-        dest: /var/www/html/file_1K.html
+    # - name: Send NWEB lightweight http server
+    #   template:
+    #     src: ../templates/nweb
+    #     dest: /tmp/scripts/nweb
+    # - name: Send Index file of 1M
+    #   template:
+    #     src: ../templates/index.html.1M
+    #     dest: /var/www/html/file_1M.html
+    # - name: Send Index file of 100K
+    #   template:
+    #     src: ../templates/index.html.100K
+    #     dest: /var/www/html/file_100K.html
+    # - name: Send Index file of 10K
+    #   template:
+    #     src: ../templates/index.html.10K
+    #     dest: /var/www/html/file_10K.html
+    # - name: Send Index file of 1K
+    #   template:
+    #     src: ../templates/index.html.1K
+    #     dest: /var/www/html/file_1K.html
     - name: Make all scripts executable
       shell: chmod +x -R /tmp/scripts
     

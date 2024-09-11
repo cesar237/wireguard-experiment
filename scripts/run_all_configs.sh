@@ -15,7 +15,7 @@ for config in $config_list; do
     echo $config > $data_dir/CURRENT_EXP
 
 
-    if [ -n "$(list_done_tests | grep $config$)" ]; then
+    if [ -n "$(list_done_tests | grep -e ^$config$)" ]; then
         echo $config already evaluated. Skipping...
     else
 
