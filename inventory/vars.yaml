@@ -10,13 +10,16 @@ all:
     username_client: root
     username_target: root
     username: root
-    iface: eno1
+    iface: ens10f0np0
     n_clients: 1000
     runs: 3
     batch: 100
 
     limited_bandwidth: false
     limit_bandwidth: 30mbit
+
+    enable_rps: false
+    enable_rfs: false
 
     bandwidth_varying: False
     bandwidth_list: 1G 3G 6G 9G 12G 15G 20G 22G 25G

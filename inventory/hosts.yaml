@@ -1,31 +1,31 @@
 ---
 server:
   hosts:
-    gros-1.nancy.grid5000.fr:
+    paradoxe-10.rennes.grid5000.fr:
 targets:
   hosts:
-    gros-101.nancy.grid5000.fr:
-    gros-107.nancy.grid5000.fr:
-    gros-109.nancy.grid5000.fr:
-    gros-11.nancy.grid5000.fr:
-    gros-111.nancy.grid5000.fr:
-    gros-113.nancy.grid5000.fr:
-    gros-114.nancy.grid5000.fr:
-    gros-115.nancy.grid5000.fr:
-    gros-116.nancy.grid5000.fr:
-    gros-117.nancy.grid5000.fr:
+    paradoxe-11.rennes.grid5000.fr:
+    paradoxe-12.rennes.grid5000.fr:
+    paradoxe-13.rennes.grid5000.fr:
+    paradoxe-14.rennes.grid5000.fr:
+    paradoxe-16.rennes.grid5000.fr:
+    paradoxe-17.rennes.grid5000.fr:
+    paradoxe-18.rennes.grid5000.fr:
+    paradoxe-20.rennes.grid5000.fr:
+    paradoxe-21.rennes.grid5000.fr:
+    paradoxe-24.rennes.grid5000.fr:
 clients:
   hosts:
-    gros-118.nancy.grid5000.fr:
-    gros-120.nancy.grid5000.fr:
-    gros-123.nancy.grid5000.fr:
-    gros-124.nancy.grid5000.fr:
-    gros-14.nancy.grid5000.fr:
-    gros-17.nancy.grid5000.fr:
-    gros-18.nancy.grid5000.fr:
-    gros-19.nancy.grid5000.fr:
-    gros-23.nancy.grid5000.fr:
-    gros-26.nancy.grid5000.fr:
+    paradoxe-25.rennes.grid5000.fr:
+    paradoxe-26.rennes.grid5000.fr:
+    paradoxe-27.rennes.grid5000.fr:
+    paradoxe-29.rennes.grid5000.fr:
+    paradoxe-3.rennes.grid5000.fr:
+    paradoxe-30.rennes.grid5000.fr:
+    paradoxe-31.rennes.grid5000.fr:
+    paradoxe-5.rennes.grid5000.fr:
+    paradoxe-6.rennes.grid5000.fr:
+    paradoxe-8.rennes.grid5000.fr:
 wg:
   children:
     server:
