@@ -14,6 +14,7 @@ touch $data_dir/CURRENT_EXP
 for config in $config_list; do
     echo $config > $data_dir/CURRENT_EXP
 
+    cp $ROOT/eval-configs/$config.yaml $data_dir/
 
     if [ -n "$(list_done_tests | grep -e ^$config$)" ]; then
         echo $config already evaluated. Skipping...
