@@ -24,6 +24,17 @@ export nodes=$(cat $NODEFILE)
 
 export config_list=$(ls $config_dir | cut -d. -f1)
 
+function update_job_id() {
+    if [ -z $1 ]; then
+        echo "Please give me a JOB_ID"
+        echo "Usage: update_job_id <JOB_ID>"
+        exit -1
+    else
+        JOB_ID=$1
+    fi
+
+    echo $JOB_ID > $data_dir/JOB_ID
+}
 
 function sleep_progress() {
     bar_size=50
