@@ -42,6 +42,10 @@ all:
     hyperthreaded: false
     smt: "off"
 
+    # RPS/RFS config
+    enable_rps: false
+    enable_rfs: false
+
     # Wireguard type choice
     wg_userspace: false
     wireguard_go_tailscale: True

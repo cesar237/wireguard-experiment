@@ -27,7 +27,7 @@ all:
     # IPERF3 args
     iperf_udp: False
     queue_length: 1024
-    bandwidth: 3G
+    bandwidth: 1G
     packet_size: 128K # MAX = 1048576 and 1460 for UDP
 
     # IRQBalance/RSS config
@@ -41,6 +41,10 @@ all:
     threaded: 0
     hyperthreaded: False
     smt: "off"
+
+    # RPS/RFS config
+    enable_rps: false
+    enable_rfs: false
 
     # Wireguard type choice
     wg_userspace: false
