@@ -22,10 +22,10 @@ all:
     # NETPERF args 
     netperf_testname: "TCP_STREAM" # type: TCP_STREAM, TCP_MAERTS
     latency_test : "TCP_RR" # Or UDP_RR for UDP
-    latency_req_res_size: "1500,1500" # default "1,1"
+    latency_req_res_size: "1500," # default "1,1"
 
     # IPERF3 args
-    iperf_udp: False
+    iperf_udp: true
     queue_length: 1024
     bandwidth: 30M
     packet_size: 128K # MAX = 1048576 and 1460 for UDP
@@ -34,7 +34,7 @@ all:
     irqbalanced: false
     test_latency: false
     all_on_core_0: False
-    deactivate_rss: false
+    deactivate_rss: true
 
     # NAPI/KTHREAD/WQ/SMT config
     pinned_napi: False
@@ -47,10 +47,10 @@ all:
     enable_rfs: false
 
     # Wireguard type choice
-    wg_userspace: false
-    wireguard_go_tailscale: True
+    wg_userspace: true
+    wireguard_go_tailscale: false
     boringtun: false
-    wireguard_rs: false
+    wireguard_rs: true
 
     # Sched policy
     apply_sched_policy: false

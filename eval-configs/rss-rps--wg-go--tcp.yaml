@@ -1,0 +1,59 @@
+---
+all:
+  vars:
+    ncore_set: "36"
+    nflow_set: "1 10 30 50 80 100"
+    unit_time_s: 65
+
+    # ncore_set: "36"
+    # nflow_set: "1 2 5 10 15 20"
+    # unit_time_s: 65
+
+    # Testing type choice
+    test_iperf3: true
+    test_netperf: false
+    test_hey: false
+    test_deathstar: false
+
+    # Network Configuration
+    download: false
+    bidirectional: false
+
+    # RPS/RFS Config
+    enable_rps: true
+    enable_rfs: true
+
+    # NETPERF args 
+    netperf_testname: "TCP_STREAM" # type: TCP_STREAM, TCP_MAERTS
+    latency_test : "TCP_RR" # Or UDP_RR for UDP
+    latency_req_res_size: "1500,1500" # default "1,1"
+
+    # IPERF3 args
+    iperf_udp: False
+    queue_length: 1024
+    bandwidth: 30M
+    packet_size: 128K # MAX = 1048576 and 1460 for UDP
+
+    # IRQBalance/RSS config
+    irqbalanced: false
+    test_latency: false
+    all_on_core_0: False
+    deactivate_rss: false
+
+    # NAPI/KTHREAD/WQ/SMT config
+    pinned_napi: False
+    threaded: 0
+    hyperthreaded: false
+    smt: "off"
+
+    # Wireguard type choice
+    wg_userspace: true
+    wireguard_go_tailscale: false
+    boringtun: false
+    wireguard_rs: false
+
+    # Sched policy
+    apply_sched_policy: false
+    sched_policy: "-o" # -o for default, -b for batch, -f for fifo, -r for round robin, -d for deadline
+    sched_priority: 0 # 0 for default and batch, 1 for fifo and round robin
+    
