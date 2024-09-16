@@ -33,6 +33,7 @@ function update_job_id() {
         JOB_ID=$1
     fi
 
+    rm  $data_dir/JOB_ID
     echo $JOB_ID > $data_dir/JOB_ID
 }
 
