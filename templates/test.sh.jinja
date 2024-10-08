@@ -50,18 +50,23 @@ QUEUES_PATH=/sys/class/net/wg/queues
 {% if enable_rps %}
 new_val=$(cat $QUEUES_PATH/rx-0/rps_cpus | tr 0 f)
 echo $new_val > $QUEUES_PATH/rx-0/rps_cpus
+{% else %}
+new_val=$(cat $QUEUES_PATH/rx-0/rps_cpus | tr f 0)
+echo $new_val > $QUEUES_PATH/rx-0/rps_cpus
 {% endif %}
 
 {% if enable_rfs %}
 ncpu=`nproc`
 sysctl net.core.rps_sock_flow_entries=32768
 echo $(( 32768 / ncpu )) > $QUEUES_PATH/rx-0/rps_flow_cnt
+{% else %}
+sysctl net.core.rps_sock_flow_entries=0
 {% endif %}
 
 {% if hyperthreaded %}
 ncore_set="36"
 {% else %}
-ncore_set="18 36"
+ncore_set="18"
 echo {{ smt }} > /sys/devices/system/cpu/smt/control
 {% endif %}
 
@@ -114,20 +119,24 @@ for n_core in $ncore_set ; do
         SECONDS=0
         start=`date +%S`
         start_min=`date +%M`
+        wait_before_start={{ wait_server }}
+
+        sleep $wait_before_start
 
         mkdir -p /tmp/results/run-$run/$n_core/$n_flow
 
         echo "[`$now`] Test_case: n_flow=$n_flow"
+
+        echo "[`$now`] Launching sched trace test..."
+        $script_path/wg_test_trace_printk.sh $results_path $n_core $n_flow # 10 secs
+        sleep 20
+        echo "[`$now`] Launching sched trace test...Done"
+
         echo "[`$now`] Launching global_perf test..."
         # sleep 0
         $script_path/wg_test_global_perf.sh $results_path $n_core $n_flow # 60 secs
         echo "[`$now`] Launching global_perf test...Done"
 
-        # echo "[`$now`] Launching sched trace test..."
-        # $script_path/wg_test_trace_printk.sh $results_path $n_core $n_flow # 30 secs
-        # echo "[`$now`] Launching sched trace test...Done"
-
-        echo "[`$now`] Done!"
         end=`date +%S`
         end_min=`date +%M`
         duration=`bc <<< "( (($end_min - $start_min + 60) % 60 ) * 60 + $end - $start ) "`

@@ -41,7 +41,7 @@ modality=flow
 {% if hyperthreaded %}
 ncore_set=36
 {% else %}
-ncore_set="18 36"
+ncore_set="18"
 {% endif %}
 
 
@@ -50,19 +50,28 @@ mkdir -p run-$run
 cd run-$run
 echo "[`$now`] Launching tests RUN=$run..."
 
+killall -s SIGINT iperf3
+killall netperf
+
 for n_core in $ncore_set ; do
     mkdir -p CPU-$n_core
     cd CPU-$n_core
 
     mod=nflow
     for n_flow in {{ nflow_set }}; do
-        
+        killall -s SIGINT iperf3
+        killall netperf
+
         echo "[`$now`] Test Case: n_core=$n_core, n_flow=$n_flow"
         mkdir -p $mod-$n_flow
         cd $mod-$n_flow
 
+        mkdir sar
+        cd sar
+        rm -f sar.data
+
         # killall iperf3
-        pre_heat=3
+        pre_heat={{ wait_client }}
         sleep $pre_heat
         # sleep $(( {{ index[ansible_nodename] * 0.5 }} ))
         echo [`$now`] Starting netperf of $n_flow clients...
@@ -79,9 +88,6 @@ for n_core in $ncore_set ; do
 
             netperf -H {{ target_index[ansible_nodename] }} -L $ip_addr -t {{ latency_test }} -l {{ unit_time_s }} -p $(( 15865 + $i )) -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf_rr_$i.log &
         done
-        mkdir sar
-        cd sar
-        rm -f sar.data
         sar -A -o sar.data 1 $(( {{ unit_time_s }} - pre_heat )) > /dev/null
         killall -s SIGINT iperf3
         killall -s SIGINT netperf

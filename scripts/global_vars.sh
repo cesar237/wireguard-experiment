@@ -24,6 +24,13 @@ export nodes=$(cat $NODEFILE)
 
 export config_list=$(ls $config_dir | cut -d. -f1)
 
+function list_results() {
+    for i in `ls $res_dir | grep results-`; do
+        echo -n "$i: "
+        cat $res_dir/$i/EXPERIMENT_DATA/CURRENT_EXP
+    done
+}
+
 function update_job_id() {
     if [ -z $1 ]; then
         echo "Please give me a JOB_ID"
@@ -33,6 +40,7 @@ function update_job_id() {
         JOB_ID=$1
     fi
 
+    rm  $data_dir/JOB_ID
     echo $JOB_ID > $data_dir/JOB_ID
 }
 
