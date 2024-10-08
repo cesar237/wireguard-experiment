@@ -41,7 +41,7 @@ modality=flow
 {% if hyperthreaded %}
 ncore_set=36
 {% else %}
-ncore_set="18 36"
+ncore_set="18"
 {% endif %}
 
 
@@ -59,7 +59,9 @@ for n_core in $ncore_set ; do
 
     mod=nflow
     for n_flow in {{ nflow_set }}; do
-        
+        killall -s SIGINT iperf3
+        killall netperf
+
         echo "[`$now`] Test Case: n_core=$n_core, n_flow=$n_flow"
         mkdir -p $mod-$n_flow
         cd $mod-$n_flow
@@ -69,7 +71,7 @@ for n_core in $ncore_set ; do
         rm -f sar.data
 
         # killall iperf3
-        pre_heat=3
+        pre_heat={{ wait_client }}
         sleep $pre_heat
         # sleep $(( {{ index[ansible_nodename] * 0.5 }} ))
         echo [`$now`] Starting netperf of $n_flow clients...

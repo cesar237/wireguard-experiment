@@ -14,7 +14,7 @@ cd $res_path
 mkdir trace-printk
 cd trace-printk
 
-trace-cmd record -p nop -e sched -v -e sched_stat_runtime -- sleep 1
+trace-cmd record -p nop -e napi -e sched -v -e sched_stat_runtime -- sleep 7
 
 cd ..
 

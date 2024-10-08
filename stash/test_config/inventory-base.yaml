@@ -13,6 +13,8 @@ all:
 
     n_clients: 1000
     runs: 3
+    wait_server: 0
+    wait_client: 3
     # Choose testname between TCP_STREAM, TCP_MAERTS (Deprecated)
     netperf_testname: "TCP_STREAM"
     latency_test : "TCP_RR" # Or UDP_RR for UDP
