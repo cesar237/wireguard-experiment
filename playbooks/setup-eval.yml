@@ -28,8 +28,3 @@
 - name: Include Config File Upload playbook
   import_playbook: "upload-config-files.yml"
 
-- name: Include Wireguard Setup playbook
-  import_playbook: "setup-wireguard.yml"
-
-- name: Include network configuration playbook
-  import_playbook: "setup-network.yml"

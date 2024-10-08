@@ -50,12 +50,17 @@ QUEUES_PATH=/sys/class/net/wg/queues
 {% if enable_rps %}
 new_val=$(cat $QUEUES_PATH/rx-0/rps_cpus | tr 0 f)
 echo $new_val > $QUEUES_PATH/rx-0/rps_cpus
+{% else %}
+new_val=$(cat $QUEUES_PATH/rx-0/rps_cpus | tr f 0)
+echo $new_val > $QUEUES_PATH/rx-0/rps_cpus
 {% endif %}
 
 {% if enable_rfs %}
 ncpu=`nproc`
 sysctl net.core.rps_sock_flow_entries=32768
 echo $(( 32768 / ncpu )) > $QUEUES_PATH/rx-0/rps_flow_cnt
+{% else %}
+sysctl net.core.rps_sock_flow_entries=0
 {% endif %}
 
 {% if hyperthreaded %}

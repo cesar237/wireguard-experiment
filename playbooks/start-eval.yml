@@ -1,4 +1,15 @@
 ---
+- name: Resend activate_wg.sh script
+  hosts: server
+  remote_user: "{{ username_server }}"
+  gather_facts: false
+
+  tasks:
+    - name: Send activate_wg.sh script
+      template:
+        src: ../templates/activate_wg.sh.jinja
+        dest: /tmp/scripts/activate_wg.sh
+
 - name: Resend test script of server
   hosts: server
   remote_user: "{{ username }}"
@@ -31,6 +42,12 @@
       template:
         src: ../templates/launch_netserver.sh.jinja
         dest: /tmp/scripts/test.sh
+
+- name: Include Wireguard Setup playbook
+  import_playbook: "setup-wireguard.yml"
+
+- name: Include network configuration playbook
+  import_playbook: "setup-network.yml"
 
 - name: Launch test script on server and clients
   hosts: [server, clients]

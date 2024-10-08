@@ -50,6 +50,9 @@ mkdir -p run-$run
 cd run-$run
 echo "[`$now`] Launching tests RUN=$run..."
 
+killall -s SIGINT iperf3
+killall netperf
+
 for n_core in $ncore_set ; do
     mkdir -p CPU-$n_core
     cd CPU-$n_core
@@ -60,6 +63,10 @@ for n_core in $ncore_set ; do
         echo "[`$now`] Test Case: n_core=$n_core, n_flow=$n_flow"
         mkdir -p $mod-$n_flow
         cd $mod-$n_flow
+
+        mkdir sar
+        cd sar
+        rm -f sar.data
 
         # killall iperf3
         pre_heat=3
@@ -77,9 +84,6 @@ for n_core in $ncore_set ; do
 
             netperf -H {{ target_index[ansible_nodename] }} -L $ip_addr -t {{ latency_test }} -l {{ unit_time_s }} -p $(( 15865 + $i )) -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf_rr_$i.log &
         done
-        mkdir sar
-        cd sar
-        rm -f sar.data
         sar -A -o sar.data 1 $(( {{ unit_time_s }} - pre_heat )) > /dev/null
         killall -s SIGINT iperf3
         killall -s SIGINT netperf

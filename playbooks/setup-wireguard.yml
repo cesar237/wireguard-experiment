@@ -47,3 +47,4 @@
   tasks:
     - name: Activate server config
       shell: /tmp/scripts/activate_wg.sh
+      ignore_errors: True
