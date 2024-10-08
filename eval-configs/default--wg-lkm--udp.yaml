@@ -56,4 +56,5 @@ all:
     apply_sched_policy: false
     sched_policy: "-o" # -o for default, -b for batch, -f for fifo, -r for round robin, -d for deadline
     sched_priority: 0 # 0 for default and batch, 1 for fifo and round robin
+    runs: 3
     

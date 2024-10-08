@@ -6,8 +6,8 @@ all:
     # unit_time_s: 65
 
     ncore_set: "36"
-    nflow_set: "1 2 3 5 8 10"
-    unit_time_s: 65
+    nflow_set: "100"
+    unit_time_s: 60
 
     # Testing type choice
     test_iperf3: true
@@ -20,26 +20,26 @@ all:
     bidirectional: false
 
     # NETPERF args 
-    netperf_testname: "TCP_STREAM" # type: TCP_STREAM, TCP_MAERTS
+    netperf_testname: "TCP_STREAM" # experiments-results/outputs/extract_throughput.sh experiments-results/outputs/extract_latency.sh experiments-results/outputs/extract_cpu.shtype: TCP_STREAM, TCP_MAERTS
     latency_test : "TCP_RR" # Or UDP_RR for UDP
     latency_req_res_size: "1500,1500" # default "1,1"
 
     # IPERF3 args
     iperf_udp: False
     queue_length: 1024
-    bandwidth: 1G
+    bandwidth: 30M
     packet_size: 128K # MAX = 1048576 and 1460 for UDP
 
     # IRQBalance/RSS config
     irqbalanced: false
     test_latency: false
     all_on_core_0: False
-    deactivate_rss: false
+    deactivate_rss: False
 
     # NAPI/KTHREAD/WQ/SMT config
     pinned_napi: False
     threaded: 0
-    hyperthreaded: false
+    hyperthreaded: False
     smt: "off"
 
     # RPS/RFS config

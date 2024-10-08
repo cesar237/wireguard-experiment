@@ -1,5 +1,5 @@
 #! /bin/bash
-set -x
+# set -x
 
 # This script here is for initializing the testenv
 # $1 here is the number of nodes to consider. It must be <= to the number of available

@@ -12,7 +12,6 @@ all:
     username: root
     iface: eno1 # eno1 for nancy and ens10f0np0 for rennes 
     n_clients: 1000
-    runs: 3
     batch: 100
 
     limited_bandwidth: false

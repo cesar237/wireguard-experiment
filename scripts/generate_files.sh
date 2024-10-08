@@ -1,5 +1,5 @@
 #$1=Number of target nodes and client_nodes
-set -x
+# set -x
 
 ROOT=~/wireguard-experiment
 
