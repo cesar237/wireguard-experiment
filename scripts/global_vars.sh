@@ -31,6 +31,39 @@ function list_results() {
     done
 }
 
+function extract-duration() {
+    nrun=$2
+    ncpu=$3
+    nflow=$4
+    echo "extracting..."
+    trace-cmd report -i $1 \
+        | grep duration \
+        | tr '[]' ' ' \
+        | awk -v cpu=$ncpu -v flow=$nflow -v run=$nrun \
+            '{ print cpu,flow,run,$2,$3,$9 }' \
+        | tr -d ':'
+    echo  "done!"
+}
+
+function extract-results() {
+    result_dir=$1
+    cd $result_dir
+    mkdir -p summary
+
+    for run in `ls | grep run`; do
+        nrun=`echo $run | cut -d- -f2`
+        for cpu in `ls $run | grep CPU`; do
+            ncpu=`echo $cpu | cut -d- -f2`
+            for flow in `ls $run/$cpu | grep nflow`; do
+                nflow=`echo $flow | cut -d- -f2`;
+                
+                trace_file=$run/$cpu/$flow/trace-printk/trace.dat
+                extract-duration $trace_file $nrun $ncpu $nflow > summary/trace-$ncpu-$nflow-$nrun.csv
+            done
+        done
+    done
+}
+
 function update_job_id() {
     if [ -z $1 ]; then
         echo "Please give me a JOB_ID"
