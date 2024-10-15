@@ -77,6 +77,10 @@
       template:
         src: ../templates/wg_test_trace_printk.sh
         dest: /tmp/scripts/wg_test_trace_printk.sh
+    - name: Send wg_test_trace_printk.sh
+      template:
+        src: ../templates/wg_test_perf.sh
+        dest: /tmp/scripts/wg_test_perf.sh
     - name: Send wg_test_global_perf.sh
       template:
         src: ../templates/wg_test_global_perf.sh
