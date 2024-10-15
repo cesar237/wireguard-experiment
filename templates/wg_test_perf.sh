@@ -11,10 +11,13 @@ cd $res_path
 
 
 # Get trace infos
-mkdir trace-printk
-cd trace-printk
+mkdir perf
+cd perf
 
-trace-cmd record -p nop -e napi -e sched -v -e sched_stat_runtime -- sleep 5
+perf record -F 998 -a -g -- sleep 10
+perf script > out.perf
+
+# trace-cmd record -p nop -e napi -e sched -v -e sched_stat_runtime -- sleep 7
 
 cd ..
 

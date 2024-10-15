@@ -39,7 +39,7 @@ last=0
 modality=flow
 
 {% if hyperthreaded %}
-ncore_set=36
+ncore_set=`nproc`
 {% else %}
 ncore_set="18"
 {% endif %}
