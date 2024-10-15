@@ -64,11 +64,11 @@ function extract-results() {
     done
 }
 
-export JOB_ID=$(current_running_job_id)
-
 function current_running_job_id() {
     oarstat | grep hmounah | grep "R default" | awk '{ print $1 }'
 }
+
+export JOB_ID=$(current_running_job_id)
 
 function update_job_id() {
     if [ -z $1 ]; then

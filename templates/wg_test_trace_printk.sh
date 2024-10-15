@@ -14,9 +14,8 @@ cd $res_path
 mkdir trace-printk
 cd trace-printk
 
-trace-cmd record -p nop -e napi -e sched -v -e sched_stat_runtime -- sleep 5
+trace-cmd record -p function_graph -l :mod:wireguard --max-graph-depth 1 -e napi -e sched -v -e sched_stat_runtime -- sleep 5
 
 cd ..
-
 
 cd $root_path
