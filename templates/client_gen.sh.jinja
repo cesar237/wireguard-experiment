@@ -78,10 +78,12 @@ for n_core in $ncore_set ; do
         for i in `seq 1 $n_flow`; do
             {% if wg_activated %}
             ip_addr=`ifconfig wg-$i | head -2 | tail -1 | awk '{print $2}'`
+            iface=wg-$i
             {% else %}
             ip_addr=`ifconfig {{ iface }} | head -2 | tail -1 | awk '{print $2}'`
+            iface={{ iface }}
             {% endif %}
-            iperf3 -c {{ target_index[ansible_nodename] }} -b {{ bandwidth }} -l {{ packet_size }}  -p $(( 12865 + $i )) -t 0 -B $ip_addr $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
+            iperf3 -c {{ target_index[ansible_nodename] }} -b {{ bandwidth }} -l {{ packet_size }}  -p $(( 12865 + $i )) -t 0 --bind-dev $iface $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
             # netperf -H {{ target_index[ansible_nodename] }} -t TCP_MAERTS -L $ip_addr -l {{ unit_time_s }} -D 1 -f m -p $(( 13865 + $i )) > netperf_$i.log &
 
             netperf -H {{ target_index[ansible_nodename] }} -L $ip_addr -t {{ latency_test }} -l {{ unit_time_s }} -p $(( 15865 + $i )) -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf_rr_$i.log &
