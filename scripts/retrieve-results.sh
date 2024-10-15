@@ -13,6 +13,9 @@ mkdir -p $res_dir/server
 
 # Retreive results from server
 scp root@$server:/tmp/results.tar.zst $res_dir/server/results.tar.zst
+
+# Zip and retreive results
+ssh root@$server "cd /tmp; zip -r results.zip results"
 scp root@$server:/tmp/results.zip $res_dir/server/results.zip
 
 # Retreive results from clients
@@ -20,6 +23,7 @@ scp root@$server:/tmp/results.zip $res_dir/server/results.zip
 for node in $clients; do
     name=`echo $node | cut -d. -f1`
     mkdir -p $res_dir/clients/$name
+    ssh root@$name "cd /tmp; zip -r results.zip results"
     scp root@$name:/tmp/results.tar.zst $res_dir/clients/$name/results.tar.zst
     scp root@$name:/tmp/results.zip $res_dir/clients/$name/results.zip
 done

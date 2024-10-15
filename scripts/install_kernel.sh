@@ -4,7 +4,7 @@ ROOT=~/wireguard-experiment
 . $ROOT/scripts/global_vars.sh
 
 VERSION=6.1.112
-FLAVOUR=-instrumented
+FLAVOUR=-instr
 SUFFIX=tar.zst
 LINUX=linux-${VERSION}$FLAVOUR.$SUFFIX
 
