@@ -53,6 +53,18 @@ echo "[`$now`] Launching tests RUN=$run..."
 killall -s SIGINT iperf3
 killall netperf
 
+{% if iperf_udp %}
+TYPE=UDP
+{% else %}
+TYPE=TCP
+{% endif %}
+
+{% if download %}
+DIRECTION=MAERTS
+{% else %}
+DIRECTION=STREAM
+{% endif %}
+
 for n_core in $ncore_set ; do
     mkdir -p CPU-$n_core
     cd CPU-$n_core
@@ -83,10 +95,16 @@ for n_core in $ncore_set ; do
             ip_addr=`ifconfig {{ iface }} | head -2 | tail -1 | awk '{print $2}'`
             iface={{ iface }}
             {% endif %}
-            iperf3 -c {{ target_index[ansible_nodename] }} -b {{ bandwidth }} -l {{ packet_size }}  -p $(( 12865 + $i )) -t 0 --bind-dev $iface $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
-            # netperf -H {{ target_index[ansible_nodename] }} -t TCP_MAERTS -L $ip_addr -l {{ unit_time_s }} -D 1 -f m -p $(( 13865 + $i )) > netperf_$i.log &
 
+            {% if throughput_test == "IPERF" %}
+            iperf3 -c {{ target_index[ansible_nodename] }} -b {{ bandwidth }} -l {{ packet_size }}  -p $(( 12865 + $i )) -t 0 --bind-dev $iface $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
+            {% else %}
+            netperf -H {{ target_index[ansible_nodename] }} -t ${TYPE}_${DIRECTION} -L $ip_addr -l {{ unit_time_s }} -D 1 -f m -p $(( 13865 + $i )) > netperf_$i.log &
+            {% endif %}
+
+            {% if include_latency %}            
             netperf -H {{ target_index[ansible_nodename] }} -L $ip_addr -t {{ latency_test }} -l {{ unit_time_s }} -p $(( 15865 + $i )) -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf_rr_$i.log &
+            {% endif %}
         done
         sar -A -o sar.data 1 $(( {{ unit_time_s }} - pre_heat )) > /dev/null
         killall -s SIGINT iperf3

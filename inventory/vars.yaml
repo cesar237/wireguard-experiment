@@ -14,8 +14,11 @@ all:
     n_clients: 1000
     batch: 100
 
+    throughput_test: IPERF # IPERF or NETPERF
     limited_bandwidth: false
     limit_bandwidth: 30mbit
+
+    include_latency: False
 
     bandwidth_varying: False
     bandwidth_list: 1G 3G 6G 9G 12G 15G 20G 22G 25G
