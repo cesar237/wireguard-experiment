@@ -1,0 +1,44 @@
+#! /bin/bash
+
+{% if boringtun %}
+wg_launcher="boringtun-cli --disable-drop-privileges -t `nproc`"
+{% elif wireguard_go_tailscale %}
+wg_launcher="/tmp/scripts/tailscale/wireguard-go/wireguard-go"
+{% elif wireguard_rs %}
+wg_launcher="/tmp/scripts/wireguard-rs/target/release/wireguard-rs"
+{% elif custom_go %}
+version={{ version_go }}
+wg_launcher="/tmp/scripts/${version}_go/wireguard-go/wireguard-go"
+{% else %}
+wg_launcher="/tmp/scripts/wireguard-go/wireguard-go"
+{% endif %}
+
+{% if wg_userspace %}
+
+for conf_file in `ls ~/confs`; do
+    conf=`echo $conf_file | cut -d. -f 1`
+    nohup $wg_launcher $conf
+    addr=`head -n 3 ~/confs/$conf_file | tail -n 1 | awk -F"=" '{ print $2 }'`
+    table=`head -n 8 ~/confs/$conf_file | tail -n 1 | awk -F"=" '{ print $2 }'`
+    wg setconf $conf ~/confs/$conf_file
+    nohup ip l set mtu 1420 up dev $conf 
+    nohup ip addr add $addr dev $conf
+    ip -4 route add 0.0.0.0/0 dev $conf table $table
+
+    nohup iptables -A FORWARD -i $conf -j ACCEPT
+    nohup iptables -t nat -A POSTROUTING -o {{ iface }} -j MASQUERADE
+done
+{% else %}
+
+
+{% if custom_kernel %}
+version={{ version_kernel }}
+modprobe wireguard
+rmmod wireguard
+insmod /tmp/scripts/$version/wireguard/wireguard.ko
+{% endif %}
+cd
+for i in `ls confs`; do 
+    nohup wg-quick up ~/confs/$i ; 
+done
+{% endif %}

@@ -7,7 +7,7 @@
   tasks:
     - name: Install the dependencies
       apt:
-        name: [git, zip, ethtool, linux-cpupower, zstd, bc, curl, tree, trace-cmd, sysstat, iptables, wireguard, python3, python3-pip, iperf3, dnsutils, csvtool, netperf, bc, nginx, apache2, traceroute, iftop, htop, tcpdump, net-tools, iproute2, psmisc, tree, linux-perf]
+        name: [git, zip, ethtool, linux-cpupower, zstd, bc, curl, tree, trace-cmd, sysstat, iptables, wireguard, iperf3, dnsutils, netperf, bc, nginx, apache2, traceroute, iftop, htop, tcpdump, net-tools, iproute2, psmisc, tree, linux-perf, make, build-essential, dwarves, linux-headers-6.1.0-28-amd64]
         state: present
     # - name : Install flame graph
     #   git:

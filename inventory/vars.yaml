@@ -11,14 +11,14 @@ all:
     username_target: root
     username: root
     iface: eno1 # eno1 for nancy and ens10f0np0 for rennes 
-    n_clients: 1000
+    n_clients: 100
     batch: 100
 
     throughput_test: IPERF # IPERF or NETPERF
     limited_bandwidth: false
-    limit_bandwidth: 30mbit
+    limit_bandwidth: 25Gbit
 
-    include_latency: False
+    include_latency: True
 
     bandwidth_varying: False
     bandwidth_list: 1G 3G 6G 9G 12G 15G 20G 22G 25G

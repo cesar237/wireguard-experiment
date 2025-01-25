@@ -10,6 +10,17 @@
         src: ../templates/activate_wg.sh.jinja
         dest: /tmp/scripts/activate_wg.sh
 
+- name: Resend activate_wg_client.sh script
+  hosts: clients
+  remote_user: "{{ username_server }}"
+  gather_facts: false
+
+  tasks:
+    - name: Send activate_wg.sh script
+      template:
+        src: ../templates/activate_wg_client.sh.jinja
+        dest: /tmp/scripts/activate_wg.sh
+
 - name: Resend test script of server
   hosts: server
   remote_user: "{{ username }}"

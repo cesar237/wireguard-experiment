@@ -30,6 +30,7 @@ offset={{ (index[ansible_nodename] - 1)*batch }}
 # Delete residual data
 rm -r /tmp/results
 rm /tmp/client-data.zip
+rm -rv ~/go*
 
 mkdir -p /tmp/results
 
@@ -64,6 +65,10 @@ DIRECTION=MAERTS
 {% else %}
 DIRECTION=STREAM
 {% endif %}
+
+sysctl fs.inotify.max_user_instances=8192
+sysctl fs.inotify.max_user_watches=524288
+sysctl -p
 
 for n_core in $ncore_set ; do
     mkdir -p CPU-$n_core
@@ -103,7 +108,7 @@ for n_core in $ncore_set ; do
             {% endif %}
 
             {% if include_latency %}            
-            netperf -H {{ target_index[ansible_nodename] }} -L $ip_addr -t {{ latency_test }} -l {{ unit_time_s }} -p $(( 15865 + $i )) -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf_rr_$i.log &
+            netperf -H {{ target_index[ansible_nodename] }} -L $ip_addr -t {{ latency_test }} -l -10 -p $(( 15865 + $i )) -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf_rr_$i.log &
             {% endif %}
         done
         sar -A -o sar.data 1 $(( {{ unit_time_s }} - pre_heat )) > /dev/null

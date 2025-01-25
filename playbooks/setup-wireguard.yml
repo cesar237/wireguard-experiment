@@ -27,20 +27,12 @@
           -i {{ index[ansible_nodename] }} \
           {% if is_personal %} -m {% endif %} \
           -o /root/confs \
+          {% if wg_userspace %} -u {% endif %} \
           -d {{ server_address }}
   
-- name: Activate wireguard interfaces on wireguard clients 
-  hosts: clients
-  remote_user: "{{ username_client }}"
 
-  tasks:
-    - name: Activate Wireguard conf on clients
-      shell:
-        cmd: for i in `ls confs`; do wg-quick up confs/$i ; done
-      ignore_errors: true
-
-- name: Activate wireguard interfaces on server 
-  hosts: server
+- name: Activate wireguard interfaces 
+  hosts: [server, clients]
   remote_user: "{{ username_server }}"
   gather_facts: false
 

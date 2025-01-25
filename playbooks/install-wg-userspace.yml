@@ -13,7 +13,7 @@
   import_playbook: "install-dependencies.yml"
 
 - name: Install Go and wireguard-go on server
-  hosts: server
+  hosts: [server, clients]
   remote_user: "{{ username_server }}"
   gather_facts: false
 
@@ -41,6 +41,30 @@
         repo: https://github.com/tailscale/wireguard-go.git
         dest: /tmp/scripts/tailscale/wireguard-go
         force: true
+    - name : Get partial encrypt Wireguard-go source code from Theo repo
+      git:
+        repo: https://github.com/cesar237/encryptonce.git
+        dest: /tmp/scripts/partial_encrypt_go/wireguard-go
+        version: partial
+        force: true
+    - name : Get No encrypt Wireguard-go source code from Theo repo
+      git:
+        repo: https://github.com/Jo-Blade/encryptonce.git
+        dest: /tmp/scripts/no_encrypt_go/wireguard-go
+        version: no_encrypt
+        force: true
+    - name : Get No encrypt Wireguard-kernel source code
+      git:
+        repo: https://github.com/cesar237/encryptonce.git
+        dest: /tmp/scripts/no_encrypt_kernel/wireguard
+        version: no_kernel
+        force: true
+    - name : Get total encrypt Wireguard-kernel source code
+      git:
+        repo: https://github.com/cesar237/encryptonce.git
+        dest: /tmp/scripts/total_encrypt_kernel/wireguard
+        version: kernel-6.1
+        force: true
     - name: Build Wireguard-go
       shell: cd /tmp/scripts/wireguard-go && make
     - name: Build Wireguard-rs
@@ -49,6 +73,14 @@
       shell: cd /tmp/scripts/wireguard-rs && ~/.cargo/bin/cargo fix --bin "wireguard-rs" --allow-dirty
     - name: Build Tailscale Wireguard-go
       shell: cd /tmp/scripts/tailscale/wireguard-go && make
+    - name: Build partial_encrypt Wireguard-go
+      shell: cd /tmp/scripts/partial_encrypt_go/wireguard-go && make
+    - name: Build no-encrypt Wireguard-go
+      shell: cd /tmp/scripts/no_encrypt_go/wireguard-go && make
+    - name: Build no-encrypt Wireguard-kernel
+      shell: cd /tmp/scripts/no_encrypt_kernel/wireguard && make
+    - name: Build total-encrypt Wireguard-kernel
+      shell: cd /tmp/scripts/total_encrypt_kernel/wireguard && make
 
 # - name: Install BoringTUN on server
 #   hosts: server

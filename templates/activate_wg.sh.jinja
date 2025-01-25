@@ -6,6 +6,9 @@ wg_launcher="boringtun-cli --disable-drop-privileges -t `nproc`"
 wg_launcher="/tmp/scripts/tailscale/wireguard-go/wireguard-go"
 {% elif wireguard_rs %}
 wg_launcher="/tmp/scripts/wireguard-rs/target/release/wireguard-rs"
+{% elif custom_go %}
+version={{ version_go }}
+wg_launcher="/tmp/scripts/${version}_go/wireguard-go/wireguard-go"
 {% else %}
 wg_launcher="/tmp/scripts/wireguard-go/wireguard-go"
 {% endif %}
@@ -25,7 +28,14 @@ done
 nohup iptables -A FORWARD -i wg -j ACCEPT
 nohup iptables -t nat -A POSTROUTING -o {{ iface }} -j MASQUERADE 
 {% else %}
+{% if custom_kernel %}
+version={{ version_kernel }}
+modprobe wireguard
+rmmod wireguard
+insmod /tmp/scripts/$version/wireguard/wireguard.ko
+{% endif %}
+cd
 for i in `ls confs`; do 
-    nohup wg-quick up confs/$i ; 
+    nohup wg-quick up ~/confs/$i ; 
 done
 {% endif %}

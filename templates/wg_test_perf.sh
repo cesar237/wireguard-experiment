@@ -14,7 +14,7 @@ cd $res_path
 mkdir perf
 cd perf
 
-perf record -F 998 -a -g -- sleep 10
+perf record -F 998 -a -g -- sleep 5
 perf script > out.perf
 
 # trace-cmd record -p nop -e napi -e sched -v -e sched_stat_runtime -- sleep 7

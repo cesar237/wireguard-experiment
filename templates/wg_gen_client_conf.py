@@ -18,6 +18,21 @@ AllowedIPs = 0.0.0.0/0
 Endpoint = {}
 """
 
+template_usr_space = """
+[Interface]
+#Address = {}
+#PostUp =  iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ iface }} -j MASQUERADE; ip rule add from {} lookup {}
+#PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o {{ iface }}  -j MASQUERADE; ip rule add from {} lookup {}
+ListenPort = {}
+PrivateKey = {}
+#Table = {}
+
+[Peer]
+PublicKey = {}
+AllowedIPs = 0.0.0.0/0
+Endpoint = {}
+"""
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-k", "--keypairs", required=True, help="The file that holds the client keypairs")
@@ -27,6 +42,7 @@ parser.add_argument("-d", "--server-ip", required=True, help="The physical IP ad
 parser.add_argument("-m", "--is-personal", action='store_true', default=False)
 # parser.add_argument("-b", "--client-batch", required=True, help="The number of Wireguard clients per batch")
 parser.add_argument("-i", "--index", required=True, type=int, help="The index from which the conf files are generated")
+parser.add_argument("-u", "--user-space", action='store_true', default=False, help="The number of clients per batch")
 parser.add_argument("-o", "--output-dir", default=".", help="The directory where the generated conf files are stored")
 args = parser.parse_args()
 
@@ -37,6 +53,9 @@ if __name__ == "__main__":
 
     os.makedirs(args.output_dir, exist_ok=True)
     client_idx = args.index
+    
+    if args.user_space:
+        template = template_usr_space
 
     for i in range(args.nfiles):
         global_index = args.nfiles*(args.index - 1) + i

@@ -4,7 +4,8 @@
 ROOT=~/wireguard-experiment
 . $ROOT/scripts/global_vars.sh
 
-WAIT_TIME=$(( 65 * 6 * 2 * 3 ))
+WAIT_TIME=$(( 65 * 5 * 2 * 3 ))
+# UNIT_TIME * NCLIENTS * WITH LATENCY * RUNS
 
 now="date +%H:%M:%S"
 

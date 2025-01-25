@@ -9,7 +9,7 @@ else
     VERSION=$1
 fi
 
-FLAVOUR=-xxx
+FLAVOUR=-mq
 SUFFIX=zip
 LINUX=linux-${VERSION}$FLAVOUR.$SUFFIX
 
