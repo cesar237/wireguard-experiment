@@ -1,3 +1,5 @@
+ip_addr=`ifconfig eno1 | head -2 | tail -1 | awk '{print $2}'`
+
 for i in `seq 0 {{ batch }}`; do
         echo Launching netserver on port $(( 15865 + i + 1 ))
         netserver -p $(( 15865 + i + 1 )) > /dev/null
@@ -5,6 +7,9 @@ for i in `seq 0 {{ batch }}`; do
         netserver -p $(( 13865 + i + 1 )) > /dev/null
         echo Launching iperf3 on port $(( 12865 + i + 1 ))
         iperf3 -s -p $(( 12865 + i + 1 )) -D
+        echo Launching sockperf server on port $(( 24000 + i + 1 ))
+        /usr/bin/sockperf server -i $ip_addr -p $(( 24000 + i + 1 )) --tcp --daemonize > /dev/null
+        /usr/bin/sockperf server -i $ip_addr -p $(( 24000 + i + 1 )) --udp --daemonize > /dev/null
 done
 
 systemctl stop nginx

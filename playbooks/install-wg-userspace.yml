@@ -26,21 +26,21 @@
       shell: ln -fs /usr/local/go/bin/go /usr/bin/go
     - name: Make gofmt runnable in PATH
       shell: ln -fs /usr/local/go/bin/gofmt /usr/bin/gofmt
-    - name : Get vanilla Wireguard-go source code
-      git:
-        repo: https://git.zx2c4.com/wireguard-go
-        dest: /tmp/scripts/wireguard-go
-        force: true
-    - name : Get vanilla Wireguard-rs source code
-      git:
-        repo: https://git.zx2c4.com/wireguard-rs
-        dest: /tmp/scripts/wireguard-rs
-        force: true
-    - name : Get tailscale Wireguard-go source code
-      git:
-        repo: https://github.com/tailscale/wireguard-go.git
-        dest: /tmp/scripts/tailscale/wireguard-go
-        force: true
+    # - name : Get vanilla Wireguard-go source code
+    #   git:
+    #     repo: https://git.zx2c4.com/wireguard-go
+    #     dest: /tmp/scripts/wireguard-go
+    #     force: true
+    # - name : Get vanilla Wireguard-rs source code
+    #   git:
+    #     repo: https://git.zx2c4.com/wireguard-rs
+    #     dest: /tmp/scripts/wireguard-rs
+    #     force: true
+    # - name : Get tailscale Wireguard-go source code
+    #   git:
+    #     repo: https://github.com/tailscale/wireguard-go.git
+    #     dest: /tmp/scripts/tailscale/wireguard-go
+    #     force: true
     - name : Get partial encrypt Wireguard-go source code from Theo repo
       git:
         repo: https://github.com/cesar237/encryptonce.git
@@ -53,11 +53,23 @@
         dest: /tmp/scripts/no_encrypt_go/wireguard-go
         version: no_encrypt
         force: true
+    - name : Get No encrypt v2 Wireguard-kernel source code
+      git:
+        repo: https://github.com/cesar237/encryptonce.git
+        dest: /tmp/scripts/no_encrypt_kernel_v2/wireguard
+        version: no_kernel_v2
+        force: true
     - name : Get No encrypt Wireguard-kernel source code
       git:
         repo: https://github.com/cesar237/encryptonce.git
         dest: /tmp/scripts/no_encrypt_kernel/wireguard
         version: no_kernel
+        force: true
+    - name : Get Partial encrypt Wireguard-kernel source code
+      git:
+        repo: https://github.com/cesar237/encryptonce.git
+        dest: /tmp/scripts/partial_encrypt_kernel/wireguard
+        version: partial_kernel
         force: true
     - name : Get total encrypt Wireguard-kernel source code
       git:
@@ -65,22 +77,82 @@
         dest: /tmp/scripts/total_encrypt_kernel/wireguard
         version: kernel-6.1
         force: true
-    - name: Build Wireguard-go
-      shell: cd /tmp/scripts/wireguard-go && make
-    - name: Build Wireguard-rs
-      shell: cd /tmp/scripts/wireguard-rs && ~/.cargo/bin/cargo build --release
-    - name: Build Wireguard-rs (fix)
-      shell: cd /tmp/scripts/wireguard-rs && ~/.cargo/bin/cargo fix --bin "wireguard-rs" --allow-dirty
-    - name: Build Tailscale Wireguard-go
-      shell: cd /tmp/scripts/tailscale/wireguard-go && make
+    - name : Get total encrypt v2 Wireguard-kernel source code
+      git:
+        repo: https://github.com/cesar237/encryptonce.git
+        dest: /tmp/scripts/total_encrypt_kernel_v2/wireguard
+        version: yes_kernel_v2
+        force: true
+    - name : Get total encrypt v3 Wireguard-kernel source code
+      git:
+        repo: https://github.com/cesar237/encryptonce.git
+        dest: /tmp/scripts/total_encrypt_kernel_v3/wireguard
+        version: yes_kernel_v3
+        force: true
+    - name : Get total encrypt v3 Wireguard-kernel source code
+      git:
+        repo: https://github.com/cesar237/encryptonce.git
+        dest: /tmp/scripts/cryptonce/wireguard
+        version: partial_kernel_check_port
+        force: true
+    - name : Get total encrypt v3 Wireguard-kernel source code
+      git:
+        repo: https://github.com/cesar237/encryptonce.git
+        dest: /tmp/scripts/total_encrypt_kernel_v3_bp/wireguard
+        version: yes_kernel_v3_batch_polling
+        force: true
+    - name : Get total encrypt v3 Wireguard-kernel source code
+      git:
+        repo: https://github.com/cesar237/encryptonce.git
+        dest: /tmp/scripts/partial_encrypt_kernel_v3_bp/wireguard
+        version: partial_kernel_v3_batch_polling
+        force: true
+    - name : Get partial encrypt v3 Wireguard-kernel source code
+      git:
+        repo: https://github.com/cesar237/encryptonce.git
+        dest: /tmp/scripts/partial_encrypt_kernel_v3/wireguard
+        version: partial_kernel_v3
+        force: true
+    - name : Get partial encrypt v2 Wireguard-kernel source code
+      git:
+        repo: https://github.com/cesar237/encryptonce.git
+        dest: /tmp/scripts/partial_encrypt_kernel_v2/wireguard
+        version: partial_kernel_v2
+        force: true
+    # - name: Build Wireguard-go
+    #   shell: cd /tmp/scripts/wireguard-go && make
+    # - name: Build Wireguard-rs
+    #   shell: cd /tmp/scripts/wireguard-rs && ~/.cargo/bin/cargo build --release
+    # - name: Build Wireguard-rs (fix)
+    #   shell: cd /tmp/scripts/wireguard-rs && ~/.cargo/bin/cargo fix --bin "wireguard-rs" --allow-dirty
+    # - name: Build Tailscale Wireguard-go
+    #   shell: cd /tmp/scripts/tailscale/wireguard-go && make
     - name: Build partial_encrypt Wireguard-go
       shell: cd /tmp/scripts/partial_encrypt_go/wireguard-go && make
     - name: Build no-encrypt Wireguard-go
       shell: cd /tmp/scripts/no_encrypt_go/wireguard-go && make
     - name: Build no-encrypt Wireguard-kernel
       shell: cd /tmp/scripts/no_encrypt_kernel/wireguard && make
+    - name: Build partial-encrypt Wireguard-kernel
+      shell: cd /tmp/scripts/partial_encrypt_kernel/wireguard && make
     - name: Build total-encrypt Wireguard-kernel
       shell: cd /tmp/scripts/total_encrypt_kernel/wireguard && make
+    - name: Build partial-encrypt-v2 Wireguard-kernel
+      shell: cd /tmp/scripts/partial_encrypt_kernel_v2/wireguard && make
+    - name: Build total-encrypt-v2 Wireguard-kernel
+      shell: cd /tmp/scripts/total_encrypt_kernel_v2/wireguard && make
+    - name: Build total-encrypt-v3 Wireguard-kernel
+      shell: cd /tmp/scripts/total_encrypt_kernel_v3/wireguard && make
+    - name: Build partial-encrypt-with check port Wireguard-kernel
+      shell: cd /tmp/scripts/cryptonce/wireguard && make
+    - name: Build partial-encrypt-v3 Wireguard-kernel
+      shell: cd /tmp/scripts/partial_encrypt_kernel_v3/wireguard && make
+    - name: Build total-encrypt-v3 batch polling mode Wireguard-kernel
+      shell: cd /tmp/scripts/total_encrypt_kernel_v3_bp/wireguard && make
+    - name: Build partial-encrypt-v3 batch polling mode Wireguard-kernel
+      shell: cd /tmp/scripts/partial_encrypt_kernel_v3_bp/wireguard && make
+    - name: Build no-encrypt-v2 Wireguard-kernel
+      shell: cd /tmp/scripts/no_encrypt_kernel_v2/wireguard && make
 
 # - name: Install BoringTUN on server
 #   hosts: server

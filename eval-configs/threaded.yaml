@@ -3,7 +3,7 @@ all:
   vars:
     # ncore_set: "36"
     # nflow_set: "1 10 30 50 80 100"
-    # unit_time_s: 65
+    # unit_time_s: 30
 
     ncore_set: "36"
     nflow_set: "30 50 100"
@@ -60,7 +60,7 @@ all:
     apply_sched_policy: false
     sched_policy: "-o" # -o for default, -b for batch, -f for fifo, -r for round robin, -d for deadline
     sched_priority: 0 # 0 for default and batch, 1 for fifo and round robin
-    runs: 12
+    runs: 2
     wait_server: 0
     wait_client: 3
     

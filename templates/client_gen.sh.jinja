@@ -103,12 +103,21 @@ for n_core in $ncore_set ; do
 
             {% if throughput_test == "IPERF" %}
             iperf3 -c {{ target_index[ansible_nodename] }} -b {{ bandwidth }} -l {{ packet_size }}  -p $(( 12865 + $i )) -t 0 --bind-dev $iface $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
-            {% else %}
+            {% endif %}
+            
+            {% if throughput_test == "NETPERF" %}
             netperf -H {{ target_index[ansible_nodename] }} -t ${TYPE}_${DIRECTION} -L $ip_addr -l {{ unit_time_s }} -D 1 -f m -p $(( 13865 + $i )) > netperf_$i.log &
             {% endif %}
 
-            {% if include_latency %}            
-            netperf -H {{ target_index[ansible_nodename] }} -L $ip_addr -t {{ latency_test }} -l -10 -p $(( 15865 + $i )) -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf_rr_$i.log &
+            {% if throughput_test == "SOCKPERF" %}
+            /usr/bin/sockperf ul --mps={{ PPS }} --{{SOCKPERF_TRAFFIC}} -i {{ target_index[ansible_nodename] }} -p $(( 24000 + $i)) -t $(( {{ unit_time_s }} - pre_heat )) -m {{MSG_LEN}} --client_ip $ip_addr > sockperf_$i.log &
+            {% endif %}
+
+            {% if include_latency %}
+            duration=$(( {{ unit_time_s }} - pre_heat - 5 ))
+            for p in `seq 1 1`; do            
+                netperf -H {{ target_index[ansible_nodename] }} -L $ip_addr -t {{ latency_test }} -l -${duration} -p $(( 15865 + $i )) -- -o min_latency,mean_latency,p50_latency,p90_latency,p99_latency,max_latency,stddev_latency -r {{ latency_req_res_size }} > netperf${p}_rr_$i.log &
+            done
             {% endif %}
         done
         sar -A -o sar.data 1 $(( {{ unit_time_s }} - pre_heat )) > /dev/null

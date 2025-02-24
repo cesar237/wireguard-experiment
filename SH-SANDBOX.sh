@@ -4,29 +4,65 @@ modes="-wq -threaded -threaded-pinned"
 mode="-threaded-pinned"
 mode=""
 
+https://github.com/cesar237/encryptonce.git
+
 scripts/reboot-all.sh
+
 scripts/deploy_env.sh
-cases="upload download"
+cases="upload"
 modes="yes no"
-versions="kernel kernel-threaded"
-for case in $cases; do
+# modes=partial
+# versions="kernel kernel-threaded"
+versions="kernel-v1"
 for version in $versions; do
+for case in $cases; do
 for mode in $modes; do
     test=${case}--${mode}-${version}
+    echo $test
+    # scripts/deploy_env.sh
     scripts/run_playbook.sh setup-eval $test && \
     scripts/run_configs.sh $test
 done
 done
 done
 
-test=upload--yes-kernel
+scripts/deploy_env.sh
+cases="upload"
+modes="yes no"
+# modes=partial
+# versions="kernel kernel-threaded"
+versions="kernel-v1"
+for version in $versions; do
+for case in $cases; do
+for mode in $modes; do
+    test=${case}--${mode}-${version}
+    echo $test
+    # scripts/deploy_env.sh
+    scripts/run_playbook.sh setup-eval $test && \
+    scripts/run_configs.sh $test
+done
+done
+done
+
+./scripts/deploy_env.sh
+case="upload"
+mode="no"
+version="kernel-v1"
+test=${case}--${mode}-${version}
+echo $test
+# scripts/deploy_env.sh
+scripts/run_playbook.sh setup-eval $test && \
+scripts/run_configs.sh $test
+
+test=upload-kernel-find-max
 scripts/run_playbook.sh setup-eval $test && \
 scripts/run_configs.sh $test
 
 scripts/reboot-all.sh
-eval=upload--kernel
+eval=upload--yes-kernel-v1
 scripts/run_playbook.sh setup-eval ${eval} && \
 scripts/run_configs.sh ${eval}
+
 
 
 eval=upload--partial-go--tcp

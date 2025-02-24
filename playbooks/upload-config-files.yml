@@ -85,6 +85,10 @@
       template:
         src: ../templates/wg_test_global_perf.sh
         dest: /tmp/scripts/wg_test_global_perf.sh
+    - name: Send wg_test_cpu_pidstat.sh
+      template:
+        src: ../templates/wg_test_cpu_pidstat.sh
+        dest: /tmp/scripts/wg_test_cpu_pidstat.sh
     - name: Send test.sh script
       template:
         src: ../templates/test.sh.jinja
@@ -107,7 +111,15 @@
     - name: Send median_val.py         
       template:
         src: ../templates/median_val.py
-        dest: /tmp/median_val.py     
+        dest: /tmp/median_val.py
+    - name: Send script for sockperf installation
+      template:
+        src: ../templates/install_sockperf.sh
+        dest: /tmp/scripts/install_sockperf.sh 
+    - name: Send sockperf binary 
+      copy:
+        src: ../templates/sockperf
+        dest: /tmp/sockperf 
     - name: Send client keypairs
       template:
         src: ../static/keypairs.json
@@ -154,6 +166,14 @@
       template:
         src: ../templates/init_server.sh
         dest: /tmp/scripts/init_server.sh
+    - name: Send script for sockperf installation
+      template:
+        src: ../templates/install_sockperf.sh
+        dest: /tmp/scripts/install_sockperf.sh
+    - name: Send sockperf binary 
+      copy:
+        src: ../templates/sockperf
+        dest: /tmp/sockperf
     - name: Send TARGETS list
       template:
         src: ../EXPERIMENT_DATA/TARGETS
@@ -181,3 +201,12 @@
     - name: Make all scripts executable
       shell: chmod +x -R /tmp/scripts
     
+
+- name: Install Sockperf on clients and targets
+  hosts: [clients, targets]
+  remote_user: "{{ username_server }}"
+  gather_facts: false
+
+  tasks:
+    - name: Launch sockperf installation script
+      shell: /tmp/scripts/install_sockperf.sh

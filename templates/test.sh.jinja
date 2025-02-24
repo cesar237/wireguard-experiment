@@ -9,7 +9,7 @@ irqbalanced={{ irqbalanced }}
 now="date +%H:%M:%S"
 
 # Delete residual data
-rm -r /tmp/results
+rm -r /tmp/results*
 rm /tmp/outputs.zip
 rm /tmp/data.zip
 rm -rv ~/go*
@@ -112,6 +112,8 @@ results_path={{ results_path }}/run-$run
 
 echo 96000 > buffer_size_kb
 
+# rm -rf /tmp/results
+
 for n_core in $ncore_set ; do
     echo "[`$now`] Test_case: n_core=$n_core"
     root_path=$results_path;
@@ -123,11 +125,21 @@ for n_core in $ncore_set ; do
         echo on > /sys/devices/system/cpu/smt/control
     fi
 
+    # Deactivate all but core 0
+    #for i in `seq 1 $(nproc)`; do
+    #    echo 0 > /sys/devices/system/cpu/cpu$i/online
+    #done
+
     for n_flow in {{ nflow_set }}; do
         SECONDS=0
         start=`date +%S`
         start_min=`date +%M`
         wait_before_start={{ wait_server }}
+
+        # Only enable n_flow cores
+        #for i in `seq 0 $((n_flow - 1))`; do
+        #    echo 1 > /sys/devices/system/cpu/cpu$i/online
+        #done
 
         sleep $wait_before_start
 
@@ -135,19 +147,23 @@ for n_core in $ncore_set ; do
 
         echo "[`$now`] Test_case: n_flow=$n_flow"
 
-        # echo "[`$now`] Launching sched trace test..."
-        # $script_path/wg_test_trace_printk.sh $results_path $n_core $n_flow # 10 secs
+        echo "[`$now`] Launching global_perf test..."
         # sleep 10
+        $script_path/wg_test_global_perf.sh $results_path $n_core $n_flow # 60 secs
 
         echo "[`$now`] Launching global_perf test..."
-        # sleep 0
-        $script_path/wg_test_global_perf.sh $results_path $n_core $n_flow # 30 secs
+        # sleep 10
+        $script_path/wg_test_cpu_pidstat.sh $results_path $n_core $n_flow # 60 secs
+
         echo "[`$now`] Launching global_perf test...Done"
 
-        # echo "[`$now`] Launching Perf test...Done"
-        # $script_path/wg_test_perf.sh $results_path $n_core $n_flow # 10 secs
-        # sleep 10
-        
+        echo "[`$now`] Launching Perf test...Done"
+        $script_path/wg_test_perf.sh $results_path $n_core $n_flow # 10 secs
+        # sleep 5
+
+        # echo "[`$now`] Launching sched trace test..."
+        # $script_path/wg_test_trace_printk.sh $results_path $n_core $n_flow # 10 secs
+
         end=`date +%S`
         end_min=`date +%M`
         duration=`bc <<< "( (($end_min - $start_min + 60) % 60 ) * 60 + $end - $start ) "`

@@ -14,7 +14,7 @@
           {% if is_personal %} -m {% endif %} \
           {% if wg_userspace %} -u {% endif %}
 
-- name: "Generate conf files for server"
+- name: "Generate conf files for clients"
   hosts: clients
   remote_user: "{{ username }}"
   tasks:
@@ -25,11 +25,11 @@
           -s /root/server_keypairs.json \
           -n {{ batch }} \
           -i {{ index[ansible_nodename] }} \
-          {% if is_personal %} -m {% endif %} \
+          -d {{ server_address }} \
           -o /root/confs \
-          {% if wg_userspace %} -u {% endif %} \
-          -d {{ server_address }}
-  
+          {% if is_personal %} -m {% endif %} \
+          {% if wg_userspace %} -u {% endif %}
+          
 
 - name: Activate wireguard interfaces 
   hosts: [server, clients]

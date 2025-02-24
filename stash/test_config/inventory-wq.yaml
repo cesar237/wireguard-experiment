@@ -12,7 +12,7 @@ all:
     username: root
 
     n_clients: 1000
-    runs: 12
+    runs: 2
     wait_server: 0
     wait_client: 3
     # Choose testname between TCP_STREAM, TCP_MAERTS (Deprecated)

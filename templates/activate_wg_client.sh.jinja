@@ -35,7 +35,10 @@ done
 version={{ version_kernel }}
 modprobe wireguard
 rmmod wireguard
+cd /tmp/scripts/$version/wireguard
+make && make install
 insmod /tmp/scripts/$version/wireguard/wireguard.ko
+cd ~
 {% endif %}
 cd
 for i in `ls confs`; do 
