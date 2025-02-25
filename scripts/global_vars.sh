@@ -45,6 +45,13 @@ function extract-duration() {
     echo  "done!"
 }
 
+function distribute_ssh_key() {
+    echo Distributing ssh key to all reserved machines...
+    for node in $nodes; do
+        scp ~/.ssh/id_rsa root@$node:.ssh/ &
+    done
+}
+
 function extract-results() {
     result_dir=$1
     cd $result_dir
