@@ -1,0 +1,73 @@
+#! /bin/bash
+
+script_path={{ script_path }}
+results_path={{ results_path }}
+nflow_index={{ index[ansible_nodename] }}
+
+total_time={{ unit_time_s }}
+now="date +%H:%M:%S"
+offset={{ (index[ansible_nodename] - 1)*batch }}
+
+# Delete residual data
+rm /tmp/client-data.zip
+rm -rv ~/go*
+
+mkdir -p /tmp/results
+
+# sleep 3
+cd $results_path
+last=0
+modality=flow
+
+{% if hyperthreaded %}
+ncore_set=`nproc`
+{% else %}
+ncore_set="18"
+{% endif %}
+
+sysctl fs.inotify.max_user_instances=8192
+sysctl fs.inotify.max_user_watches=524288
+sysctl -p
+
+# Deactivate Hyperthreading
+echo off > /sys/devices/system/cpu/smt/control
+
+runs={{runs}}
+
+echo "[`$now`] Launching tests RUN=$runs..."
+
+resolutions="480p 720p 1080p"
+
+cd /tmp/results
+
+echo "run,resolution,bitrate,framerate,format" > streaming.csv
+
+for run in $(seq 1 $runs); do
+    echo "[`$now`] Run $run"
+
+    # Run wrk with the different file sizes
+    # And retrieve the latency
+    for resolution in $resolutions; do
+        pidstat 1 > pidstat-stream-$resolution-$run-up.data &
+        sar -A -o sar-stream-$resolution-$run-up.data 1 > /dev/null &
+        
+        # start=$(date +%s.%N)
+        ffmpeg -i https://{{ target_index[ansible_nodename] }}/hls/$resolution/playlist.m3u8 -y -f mpeg /dev/null -report
+        # end=$(date +%s.%N)
+
+        killall pidstat
+        killall sar
+        
+        # duration=$(echo "$end - $start" | bc)
+        logfile=$(ls | grep ffmpeg | tail -n 1)
+        content=$(cat $logfile | tail -n 15 | head -n 2 | tr "=" " ")
+        framerate=$(echo $content | awk '{ print $4 }')
+        bitrate=$(echo $content | awk '{ print $12 }')
+        duration=$(echo $content | awk '{ print $10 }')
+        format=mpeg
+
+        rm $logfile 
+        echo $run,$resolution,$bitrate,$framerate,$format >> streaming.csv
+    done
+done
+

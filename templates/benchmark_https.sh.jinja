@@ -1,0 +1,63 @@
+#! /bin/bash
+
+script_path={{ script_path }}
+results_path={{ results_path }}
+nflow_index={{ index[ansible_nodename] }}
+
+total_time={{ unit_time_s }}
+now="date +%H:%M:%S"
+offset={{ (index[ansible_nodename] - 1)*batch }}
+
+# Delete residual data
+rm /tmp/client-data.zip
+rm -rv ~/go*
+
+mkdir -p /tmp/results
+
+# sleep 3
+cd $results_path
+last=0
+modality=flow
+
+{% if hyperthreaded %}
+ncore_set=`nproc`
+{% else %}
+ncore_set="18"
+{% endif %}
+
+sysctl fs.inotify.max_user_instances=8192
+sysctl fs.inotify.max_user_watches=524288
+sysctl -p
+
+# Deactivate Hyperthreading
+echo off > /sys/devices/system/cpu/smt/control
+
+runs={{runs}}
+
+echo "[`$now`] Launching tests RUN=$runs..."
+
+sizes="1K 10K 100K 1M"
+
+cd /tmp/results
+
+echo "run,filesize,latency" > wrk.csv
+
+chmod +x /usr/bin/wrk
+
+for run in $(seq 1 $runs); do
+    echo "[`$now`] Run $run"
+
+    # Run wrk with the different file sizes
+    # And retrieve the latency
+    for size in $sizes; do
+        wrk -R3 -d3s -L https://{{ target_index[ansible_nodename] }}/file-$size.html > /tmp/results/wrk-$size-$run.data 
+        latency=$(cat /tmp/results/wrk-$size-$run.data \
+            | head -n 10 \
+            | tail -n 1 \
+            | tr -d 'ms' \
+            |  awk '{ print $2 }')
+        # rm /tmp/results/wrk-$size-$run.data 
+        echo $run,$size,$latency >> wrk.csv
+    done
+done
+

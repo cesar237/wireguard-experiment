@@ -29,14 +29,3 @@
           -o /root/confs \
           {% if is_personal %} -m {% endif %} \
           {% if wg_userspace %} -u {% endif %}
-          
-
-- name: Activate wireguard interfaces 
-  hosts: [server, clients]
-  remote_user: "{{ username_server }}"
-  gather_facts: false
-
-  tasks:
-    - name: Activate server config
-      shell: /tmp/scripts/activate_wg.sh
-      ignore_errors: True

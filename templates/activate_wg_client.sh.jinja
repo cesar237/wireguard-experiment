@@ -1,5 +1,7 @@
 #! /bin/bash
 
+{% if wg_userspace %}
+
 {% if boringtun %}
 wg_launcher="boringtun-cli --disable-drop-privileges -t `nproc`"
 {% elif wireguard_go_tailscale %}
@@ -12,8 +14,6 @@ wg_launcher="/tmp/scripts/${version}_go/wireguard-go/wireguard-go"
 {% else %}
 wg_launcher="/tmp/scripts/wireguard-go/wireguard-go"
 {% endif %}
-
-{% if wg_userspace %}
 
 for conf_file in `ls ~/confs`; do
     conf=`echo $conf_file | cut -d. -f 1`
@@ -32,16 +32,24 @@ done
 
 
 {% if custom_kernel %}
+
+# Check if /tmp/encryptonce directory exists, else clone the repo
+if [ ! -d /tmp/encryptonce ]; then
+    git clone https://github.com/cesar237/encryptonce /tmp/encryptonce
+fi
+
 version={{ version_kernel }}
 modprobe wireguard
 rmmod wireguard
-cd /tmp/scripts/$version/wireguard
+cd /tmp/encryptonce
+git checkout $version
 make && make install
-insmod /tmp/scripts/$version/wireguard/wireguard.ko
-cd ~
-{% endif %}
+insmod wireguard.ko
 cd
-for i in `ls confs`; do 
-    nohup wg-quick up ~/confs/$i ; 
-done
+{% endif %}
+
+# cd
+# for i in `ls confs`; do 
+#     nohup wg-quick up ~/confs/$i ; 
+# done
 {% endif %}

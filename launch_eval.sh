@@ -2,40 +2,19 @@
 
 . scripts/global_vars.sh
 
-scripts/deploy_env.sh
-
-# scripts/reboot-all.sh
-# eval=upload--yes-kernel-v1
-# scripts/run_playbook.sh setup-eval ${eval} && \
-# scripts/run_configs.sh ${eval}
-
-# # scripts/reboot-all.sh
-# eval=upload--partial-kernel-v1
-# scripts/run_playbook.sh setup-eval ${eval} && \
-# scripts/run_configs.sh ${eval}
-
-# # scripts/reboot-all.sh
-# eval=upload--yes-kernel-v3
-# scripts/run_playbook.sh setup-eval ${eval} && \
-# scripts/run_configs.sh ${eval}
-
-# # scripts/reboot-all.sh
-# eval=upload--partial-kernel-v3
-# scripts/run_playbook.sh setup-eval ${eval} && \
-# scripts/run_configs.sh ${eval}
-
-# scripts/reboot-all.sh
-eval=upload--yes-kernel-v3-bp
-scripts/run_playbook.sh setup-eval ${eval} && \
-scripts/run_configs.sh ${eval}
-
-# scripts/reboot-all.sh
-eval=upload--partial-kernel-v3-bp
-scripts/run_playbook.sh setup-eval ${eval} && \
-scripts/run_configs.sh ${eval}
+# scripts/deploy_env.sh
+distribute_ssh_key
 
 
-scripts/reboot-all.sh
-eval=upload--partial-kernel-v1-check-port
-scripts/run_playbook.sh setup-eval ${eval} && \
-scripts/run_configs.sh ${eval}
+eval=benchmark-vanilla
+echo $eval > $data_dir/CURRENT_EXP
+scripts/run_playbook.sh setup-eval ${eval}
+scripts/run_playbook.sh start-client-eval ${eval}
+scripts/retrieve-results.sh
+
+eval=benchmark-cryptonce
+rm $data_dir/CURRENT_EXP
+echo $eval > $data_dir/CURRENT_EXP
+scripts/run_playbook.sh setup-eval ${eval}
+scripts/run_playbook.sh start-client-eval ${eval}
+scripts/retrieve-results.sh

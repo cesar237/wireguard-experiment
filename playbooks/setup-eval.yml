@@ -21,10 +21,15 @@
     - name: Create scripts directory
       shell:
         cmd: mkdir -p /tmp/scripts
+      ignore_errors: true
     - name: Create results directory
       shell:
         cmd: mkdir -p {{ results_path }}
+      ignore_errors: true
 
 - name: Include Config File Upload playbook
   import_playbook: "upload-config-files.yml"
+
+- name: Configure Wireguard setup
+  import_playbook: "configure-wg-setup.yml"
 

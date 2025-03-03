@@ -7,13 +7,8 @@
   tasks:
     - name: Install the dependencies
       apt:
-        name: [git, zip, ethtool, linux-cpupower, zstd, bc, curl, tree, trace-cmd, sysstat, iptables, wireguard, iperf3, dnsutils, netperf, bc, nginx, apache2, traceroute, iftop, htop, tcpdump, net-tools, iproute2, psmisc, tree, linux-perf, make, build-essential, dwarves, linux-headers-6.1.0-30-amd64, perl, automake, autoconf, m4, libtool-bin, openssl]
+        name: [git, zip, ethtool, linux-cpupower, zstd, bc, curl, tree, trace-cmd, sysstat, iptables, wireguard, iperf3, dnsutils, netperf, bc, nginx, apache2, traceroute, iftop, htop, tcpdump, net-tools, iproute2, psmisc, tree, linux-perf, make, build-essential, dwarves, linux-headers-6.1.0-30-amd64, perl, automake, autoconf, m4, libtool-bin, openssl, libssl-dev, libpcre3-dev, zlib1g-dev, ffmpeg]
         state: present
-    # - name : Install flame graph
-    #   git:
-    #     repo: https://github.com/brendangregg/FlameGraph.git
-    #     dest: /tmp/scripts/FlameGraph
-    #     force: true
     - name: Enable sysstat monitoring
       shell: systemctl enable sysstat; systemctl start sysstat
     - name: Download cargo

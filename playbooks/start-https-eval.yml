@@ -1,24 +1,24 @@
 ---
-- name: Start servers on target
-  hosts: targets
-  remote_user: "{{ username_target }}"
+- name: Gather all facts
+  hosts: all
+  remote_user: "{{ username }}"
   gather_facts: false
 
   tasks:
-    - name: Start netserver
-      shell: /tmp/scripts/test.sh
-      ignore_errors: true
+    - name: Gather all facts
+      gather_facts:
+        parallel: true  
 
-- name: Activate wireguard interfaces on server
+- name: Setup wireguard interfaces on server
   hosts: server
-  remote_user: "{{ username_server }}"
+  remote_user: "{{ username }}"
   gather_facts: false
 
   tasks:
     - name: Activate server config
       shell: /tmp/scripts/activate_wg.sh
       ignore_errors: True
-    - name: Enable all wireguard interfaces
+    - name: Enable wireguard interfaces
       ignore_errors: true
       shell:
         cmd: for i in `ls confs`; do nohup wg-quick up ~/confs/$i ; done
@@ -26,19 +26,19 @@
       shell:
         cmd: sysctl net.ipv4.ip_forward=1
 
-- name: Apply necessary network configuration on clients 
+- name: Setup wireguard interfaces on clients
   hosts: clients
-  remote_user: "{{ username_client }}"
-  gather_facts: true
+  remote_user: "{{ username }}"
+  gather_facts: false
 
   tasks:
     - name: Activate server config
       shell: /tmp/scripts/activate_wg.sh
       ignore_errors: True
-    - name: Enable all wireguard interfaces
+    - name: Enable wireguard interfaces
       ignore_errors: true
       shell:
-        cmd: for i in `ls confs`; do nohup wg-quick up ~/confs/$i ; done
+        cmd: wg-quick up ~/confs/wg-1.conf
     - name: Remove possible existing route to target
       ignore_errors: true
       shell: 
@@ -46,10 +46,10 @@
     - name: Add route to target
       ignore_errors: true
       shell: 
-        cmd: ip route add {{ hostvars[target_index[ansible_nodename]]['ansible_default_ipv4']['address'] }} via {{ server_address }}
-
+        cmd: ip route add {{ hostvars[target_index[ansible_nodename]]['ansible_default_ipv4']['address'] }} dev wg-1
+  
 - name: Launch test script on server and clients
-  hosts: [server, clients]
+  hosts: clients
   remote_user: "{{ username }}"
   gather_facts: false
 
@@ -57,5 +57,10 @@
     - name: Make all scripts executable
       shell:
         cmd: chmod +x -R /tmp/scripts
-    - name: Launch test script
-      shell: "nohup /tmp/scripts/test.sh >> test.log 2>&1 & "
+    - name: Send benchmark script
+      template:
+        src: ../templates/benchmark_https.sh.jinja
+        dest: /tmp/scripts/benchmark_https.sh
+    - name: Launch https eval
+      shell: 
+        cmd: /tmp/scripts/benchmark_https.sh >> https_eval.log 2>&1

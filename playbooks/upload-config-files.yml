@@ -5,6 +5,10 @@
   gather_facts: false
 
   tasks:
+    - name: Send wrk binary
+      copy:
+        src: ../templates/wrk
+        dest: /usr/bin/wrk
     - name: Send activate_wg.sh script
       template:
         src: ../templates/activate_wg.sh.jinja
@@ -37,22 +41,6 @@
       template:
         src: ../templates/wg_gen_server_conf.py
         dest: /tmp/scripts/wg_gen.py
-    - name: Send trace.parser.py
-      template:
-        src: ../templates/trace.parser.py
-        dest: /tmp/scripts/trace.parser.py
-    - name: Send poll parser
-      template:
-        src: ../templates/poll.parser.py
-        dest: /tmp/scripts/poll.parser.py
-    - name: Send decrypt.parser.py
-      template:
-        src: ../templates/decrypt.parser.py
-        dest: /tmp/scripts/decrypt.parser.py
-    - name: Send perf.parser.py
-      template:
-        src: ../templates/perf.parser.py
-        dest: /tmp/scripts/perf.parser.py
     - name: Send wg_test_decrypt_worker_analysis.sh
       template:
         src: ../templates/wg_test_decrypt_worker_analysis.sh
@@ -104,10 +92,18 @@
   gather_facts: false
 
   tasks:
+    - name: Send wrk binary
+      copy:
+        src: ../templates/wrk
+        dest: /usr/bin/wrk
     - name: Send activate_wg.sh script
       template:
         src: ../templates/activate_wg_client.sh.jinja
         dest: /tmp/scripts/activate_wg.sh
+    - name: Send scp benchmark script
+      template:
+        src: ../templates/benchmark_scp.sh.jinja
+        dest: /tmp/scripts/benchmark_scp.sh
     - name: Send median_val.py         
       template:
         src: ../templates/median_val.py
@@ -162,6 +158,24 @@
       template:
         src: ../templates/launch_netserver.sh.jinja
         dest: /tmp/scripts/test.sh
+    - name: Send nginx server config file
+      copy:
+        src: ../templates/nginx-server.conf
+        dest: /etc/nginx/nginx.conf
+        force: true
+    - name: Send hls video file
+      copy:
+        src: ../templates/hls-video.zip
+        dest: /tmp/scripts/hls-video.zip
+        force: true
+    - name: Send dash video file
+      copy:
+        src: ../templates/dash-video.zip
+        dest: /tmp/scripts/dash-video.zip
+    - name: Send nginx config script
+      copy:
+        src: ../templates/configure_nginx.sh
+        dest: /tmp/scripts/configure_nginx.sh
     - name: Send init_server.sh script
       template:
         src: ../templates/init_server.sh
@@ -178,29 +192,41 @@
       template:
         src: ../EXPERIMENT_DATA/TARGETS
         dest: /tmp/scripts/TARGETS
-    # - name: Send NWEB lightweight http server
-    #   template:
-    #     src: ../templates/nweb
-    #     dest: /tmp/scripts/nweb
-    # - name: Send Index file of 1M
-    #   template:
-    #     src: ../templates/index.html.1M
-    #     dest: /var/www/html/file_1M.html
-    # - name: Send Index file of 100K
-    #   template:
-    #     src: ../templates/index.html.100K
-    #     dest: /var/www/html/file_100K.html
-    # - name: Send Index file of 10K
-    #   template:
-    #     src: ../templates/index.html.10K
-    #     dest: /var/www/html/file_10K.html
-    # - name: Send Index file of 1K
-    #   template:
-    #     src: ../templates/index.html.1K
-    #     dest: /var/www/html/file_1K.html
+    - name: Send NWEB lightweight http server
+      template:
+        src: ../templates/nweb
+        dest: /tmp/scripts/nweb
+    - name: Send Index file of 1M
+      template:
+        src: ../templates/index.html.1M
+        dest: /var/www/html/file_1M.html
+    - name: Send Index file of 100K
+      template:
+        src: ../templates/index.html.100K
+        dest: /var/www/html/file_100K.html
+    - name: Send Index file of 10K
+      template:
+        src: ../templates/index.html.10K
+        dest: /var/www/html/file_10K.html
+    - name: Send Index file of 1K
+      template:
+        src: ../templates/index.html.1K
+        dest: /var/www/html/file_1K.html
     - name: Make all scripts executable
       shell: chmod +x -R /tmp/scripts
-    
+
+- name: Send and install self signed ssl certificates to all 
+  hosts: all
+  remote_user: "{{ username_server }}"
+  gather_facts: false
+
+  tasks:
+    - name: Send ssl certificates
+      copy:
+        src: ../static/ssl-certs
+        dest: /etc/nginx/
+    - name: Install ssl certificates
+      shell: "cp /etc/nginx/ssl-certs/nginx.crt /usr/local/share/ca-certificates/nginx.crt && update-ca-certificates"
 
 - name: Install Sockperf on clients and targets
   hosts: [clients, targets]
@@ -210,3 +236,14 @@
   tasks:
     - name: Launch sockperf installation script
       shell: /tmp/scripts/install_sockperf.sh
+  
+- name: Resend test script to targets
+  hosts: targets
+  remote_user: "{{ username }}"
+  gather_facts: true
+
+  tasks:
+    - name: Send netserver launcher
+      template:
+        src: ../templates/launch_netserver.sh.jinja
+        dest: /tmp/scripts/test.sh

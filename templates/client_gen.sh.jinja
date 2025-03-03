@@ -138,9 +138,3 @@ done
 cd ..
 
 done
-
-export ZSTD_CLEVEL=19
-export ZSTD_NBTHREADS=$(( nproc ))
-
-cd /tmp
-tar --create --zstd --file results.tar.zst results/

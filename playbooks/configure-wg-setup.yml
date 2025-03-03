@@ -1,0 +1,48 @@
+---
+- name: Resend activate_wg.sh script
+  hosts: server
+  remote_user: "{{ username_server }}"
+  gather_facts: false
+
+  tasks:
+    - name: Send activate_wg.sh script
+      template:
+        src: ../templates/activate_wg.sh.jinja
+        dest: /tmp/scripts/activate_wg.sh
+
+- name: Resend activate_wg_client.sh script
+  hosts: clients
+  remote_user: "{{ username_server }}"
+  gather_facts: false
+
+  tasks:
+    - name: Send activate_wg.sh script
+      template:
+        src: ../templates/activate_wg_client.sh.jinja
+        dest: /tmp/scripts/activate_wg.sh
+
+- name: Resend test script of server
+  hosts: server
+  remote_user: "{{ username }}"
+  gather_facts: true
+
+  tasks:
+    - name: Send test.sh script
+      template:
+        src: ../templates/test.sh.jinja
+        dest: /tmp/scripts/test.sh
+
+- name: Resend test script to clients
+  hosts: clients
+  remote_user: "{{ username }}"
+  gather_facts: true
+
+  tasks:
+    - name: Send client generator script
+      template:
+        src: ../templates/client_gen.sh.jinja
+        dest: /tmp/scripts/test.sh
+
+- name: Include Wireguard Setup playbook
+  import_playbook: "setup-wireguard.yml"
+

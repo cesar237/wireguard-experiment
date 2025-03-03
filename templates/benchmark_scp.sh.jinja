@@ -1,0 +1,83 @@
+#! /bin/bash
+
+script_path={{ script_path }}
+results_path={{ results_path }}
+nflow_index={{ index[ansible_nodename] }}
+
+total_time={{ unit_time_s }}
+now="date +%H:%M:%S"
+offset={{ (index[ansible_nodename] - 1)*batch }}
+
+# Delete residual data
+rm /tmp/client-data.zip
+rm -rv ~/go*
+
+mkdir -p /tmp/results
+
+# sleep 3
+cd $results_path
+last=0
+modality=flow
+
+{% if hyperthreaded %}
+ncore_set=`nproc`
+{% else %}
+ncore_set="18"
+{% endif %}
+
+sysctl fs.inotify.max_user_instances=8192
+sysctl fs.inotify.max_user_watches=524288
+sysctl -p
+
+# Deactivate Hyperthreading
+echo off > /sys/devices/system/cpu/smt/control
+
+runs={{runs}}
+
+echo "[`$now`] Launching tests RUN=$runs..."
+
+sizes="1G 2G 5G"
+
+# Create scp files of sizes 1G, 2G, 5G
+mkdir -p /tmp/scp-files
+for size in $sizes; do
+    if [ -f /tmp/scp-files/file-$size.bin ]; then
+        echo File already exists. skipping file generation...
+    else
+        dd if=/dev/urandom of=/tmp/scp-files/file-$size.bin bs=$size count=1
+    fi
+done
+
+cd /tmp/results
+
+echo "run,filesize,duration,direction" > scp.csv
+
+for run in $(seq 1 $runs); do
+    echo "[`$now`] Run $run"
+
+    # Run scp with the different file sizes
+    # And at the same time, run pidstat to get CPU usage
+    for size in $sizes; do
+        pidstat 1 > pidstat-$size-$run-up.data &
+        sar -A -o sar-$size-$run-up.data 1 > /dev/null &
+        start=$(date +%s.%N)
+        scp -o StrictHostKeyChecking=no /tmp/scp-files/file-$size.bin {{ target_index[ansible_nodename] }}:/tmp/scp-files/
+        end=$(date +%s.%N)
+        killall pidstat
+        killall sar
+        runtime=$(echo "$end - $start" | bc)
+        echo $run,$size,$runtime,upload >> scp.csv
+    done
+
+    for size in $sizes; do
+        pidstat 1 > pidstat-$size-$run-down.data &
+        sar -A -o sar-$size-$run-down.data 1 > /dev/null &
+        start=$(date +%s.%N)
+        scp -o StrictHostKeyChecking=no {{ target_index[ansible_nodename] }}:/tmp/scp-files/file-$size.bin /tmp/scp-files/ 
+        end=$(date +%s.%N)
+        killall pidstat
+        killall sar
+        runtime=$(echo "$end - $start" | bc)
+        echo $run,$size,$runtime,download >> scp.csv
+    done
+done

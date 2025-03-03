@@ -1,0 +1,103 @@
+---
+- name: Gather all facts
+  hosts: all
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: Gather all facts
+      gather_facts:
+        parallel: true  
+
+- name: Setup targets
+  hosts: targets
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: create scp-files directory
+      ignore_errors: true
+      shell:
+        cmd: mkdir -p /tmp/scp-files
+    - name: run nginx configuration script
+      shell:
+        cmd: /tmp/scripts/configure_nginx.sh
+      ignore_errors: true
+
+- name: Setup wireguard interfaces on server
+  hosts: server
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: Activate server config
+      shell: /tmp/scripts/activate_wg.sh
+      ignore_errors: True
+    - name: Enable wireguard interfaces
+      ignore_errors: true
+      shell:
+        cmd: for i in `ls confs`; do nohup wg-quick up ~/confs/$i ; done
+    - name: Enable Ipv4 forwarding
+      shell:
+        cmd: sysctl net.ipv4.ip_forward=1
+
+- name: Setup wireguard interfaces on clients
+  hosts: clients
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: Activate server config
+      shell: /tmp/scripts/activate_wg.sh
+      ignore_errors: True
+    - name: Enable wireguard interfaces
+      ignore_errors: true
+      shell:
+        cmd: wg-quick up ~/confs/wg-1.conf
+    - name: Remove possible existing route to target
+      ignore_errors: true
+      shell: 
+        cmd: ip route del {{ hostvars[target_index[ansible_nodename]]['ansible_default_ipv4']['address'] }}
+    - name: Add route to target
+      ignore_errors: true
+      shell: 
+        cmd: ip route add {{ hostvars[target_index[ansible_nodename]]['ansible_default_ipv4']['address'] }} dev wg-1
+  
+- name: Launch test script on server and clients
+  hosts: clients
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: Make all scripts executable
+      shell:
+        cmd: chmod +x -R /tmp/scripts
+    - name: Delete results directory
+      ignore_errors: true
+      shell:
+        cmd: rm -r /tmp/results && mkdir -p /tmp/results
+    - name: Send benchmark script
+      template:
+        src: ../templates/benchmark_scp.sh.jinja
+        dest: /tmp/scripts/benchmark_scp.sh
+    - name: Send benchmark script
+      template:
+        src: ../templates/benchmark_https.sh.jinja
+        dest: /tmp/scripts/benchmark_https.sh
+    - name: Send benchmark script
+      template:
+        src: ../templates/benchmark_streaming.sh.jinja
+        dest: /tmp/scripts/benchmark_streaming.sh
+    - name: make benchmark scripts executable
+      shell:
+        cmd: chmod +x /tmp/scripts/benchmark_*.sh
+      ignore_errors: true
+    - name: Launch streaming eval
+      shell: 
+        cmd: /tmp/scripts/benchmark_streaming.sh >> streaming_eval.log 2>&1
+    - name: Launch https eval
+      shell: 
+        cmd: /tmp/scripts/benchmark_https.sh >> https_eval.log 2>&1
+    - name: Launch scp eval
+      shell: 
+        cmd: /tmp/scripts/benchmark_scp.sh >> scp_eval.log 2>&1

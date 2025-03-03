@@ -15,7 +15,16 @@ touch $data_dir/DONE_EXP
 touch $data_dir/CURRENT_EXP
 
 if  [ -z $1 ]; then
-    echo "Please give at least one config. See config list in eval-congifs dir..."
+    echo "Please give the test eval to launch. See in playbooks dir..."
+    exit 1
+else
+    eval=$1
+fi
+
+shift
+
+if  [ -z $1 ]; then
+    echo "Please give at least one config. See config list in eval-configs dir..."
     exit 1
 else
     configs=$@
@@ -31,7 +40,7 @@ for config in $configs; do
     # else
 
     echo "[$($now)] Starting Eval for configuration: $config..."
-    $script_dir/run_playbook.sh start-eval $config
+    $script_dir/run_playbook.sh $eval $config
     sleep_progress $WAIT_TIME
     echo "[$($now)] Test Finished!"
 

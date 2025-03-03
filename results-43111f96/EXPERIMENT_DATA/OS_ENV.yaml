@@ -1,0 +1,26 @@
+---
+name: debian12-nfs
+version: 2025012910
+arch: x86_64
+alias: debian12-x64-nfs
+description: debian 12 (bookworm) for x86_64 - nfs
+author: support-staff@lists.grid5000.fr
+visibility: public
+destructive: false
+os: linux
+image:
+  file: server:///grid5000/images/debian12-x64-nfs-2025012910.tar.zst
+  kind: tar
+  compression: zstd
+postinstalls:
+- archive: server:///grid5000/postinstalls/g5k-postinstall.tgz
+  compression: gzip
+  script: g5k-postinstall --net debian --net hpc --fstab nfs --restrict-user current
+    --disk-aliases
+boot:
+  kernel: "/vmlinuz"
+  initrd: "/initrd.img"
+  kernel_params: ''
+filesystem: ext4
+partition_type: 131
+multipart: false

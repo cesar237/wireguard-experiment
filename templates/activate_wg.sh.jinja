@@ -1,5 +1,7 @@
 #! /bin/bash
 
+{% if wg_userspace %}
+
 {% if boringtun %}
 wg_launcher="boringtun-cli --disable-drop-privileges -t `nproc`"
 {% elif wireguard_go_tailscale %}
@@ -13,8 +15,6 @@ wg_launcher="/tmp/scripts/${version}_go/wireguard-go/wireguard-go"
 wg_launcher="/tmp/scripts/wireguard-go/wireguard-go"
 {% endif %}
 
-{% if wg_userspace %}
-
 nohup $wg_launcher wg
 wg setconf wg confs/wg.conf
 nohup ip l set mtu 1420 up dev wg 
@@ -27,18 +27,28 @@ done
 
 nohup iptables -A FORWARD -i wg -j ACCEPT
 nohup iptables -t nat -A POSTROUTING -o {{ iface }} -j MASQUERADE 
+
 {% else %}
+
 {% if custom_kernel %}
 version={{ version_kernel }}
+
+# Check if /tmp/encryptonce directory exists, else clone the repo
+if [ ! -d /tmp/encryptonce ]; then
+    git clone https://github.com/cesar237/encryptonce /tmp/encryptonce
+fi
+
 modprobe wireguard
 rmmod wireguard
-cd /tmp/scripts/$version/wireguard
+cd /tmp/encryptonce
+git checkout $version
 make && make install
-insmod /tmp/scripts/$version/wireguard/wireguard.ko
+insmod wireguard.ko
 cd
 {% endif %}
-cd
-for i in `ls confs`; do 
-    nohup wg-quick up ~/confs/$i ; 
-done
+
+# for i in `ls confs`; do 
+#     nohup wg-quick up ~/confs/$i ; 
+# done
+
 {% endif %}

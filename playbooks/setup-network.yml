@@ -41,13 +41,3 @@
     - name: Apply limit_bandwidth on clients
       shell: /tmp/scripts/limit_bandwidth.sh
       ignore_errors: True
-
-- name: Start netserver on target in background
-  hosts: targets
-  remote_user: "{{ username_target }}"
-  gather_facts: false
-
-  tasks:
-    - name: Start netserver
-      shell: /tmp/scripts/test.sh
-      ignore_errors: true
