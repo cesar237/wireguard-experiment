@@ -14,7 +14,7 @@ cd $res_path
 mkdir pidstat
 cd pidstat
 rm -f pidstat.data
-pidstat 1 60 > pidstat.data
+pidstat 1 > pidstat.data &
 # sar -A -o sar.data 1 60 > /dev/null
 cd ..
 

@@ -98,10 +98,27 @@ done
 irqbalance -t 1 -d > /tmp/results/run-$run/$n_core/$n_flow/irqbalance.log &
 {% endif %}
 
-
 sysctl fs.inotify.max_user_instances=8192
 sysctl fs.inotify.max_user_watches=524288
 sysctl -p
+
+{% if wireguard_batch %}
+params_path=/sys/module/wireguard/parameters
+
+{% if custom_kernel_on == 'both' %}
+echo $wg_batch_size > $params_path/wg_batch_size
+echo $concurrency_level > $params_path/concurrency_level
+{% elif custom_kernel_on == 'client' %}
+echo Not batched kernel version...
+{% elif custom_kernel_on == 'server' %}
+echo $wg_batch_size > $params_path/wg_batch_size
+echo $concurrency_level > $params_path/concurrency_level
+{% endif %}
+
+path=batch-$wg_batch_size/concurrency-$concurrency_level
+mkdir -p $path
+cd $path
+{% endif %}
 
 for run in `seq 1 {{ runs }}`; do
 cd /tmp/results
@@ -149,16 +166,16 @@ for n_core in $ncore_set ; do
 
         echo "[`$now`] Launching global_perf test..."
         # sleep 10
-        $script_path/wg_test_global_perf.sh $results_path $n_core $n_flow # 60 secs
+        $script_path/wg_test_global_perf.sh $results_path $n_core $n_flow
 
         echo "[`$now`] Launching global_perf test..."
         # sleep 10
-        $script_path/wg_test_cpu_pidstat.sh $results_path $n_core $n_flow # 60 secs
+        $script_path/wg_test_cpu_pidstat.sh $results_path $n_core $n_flow
 
-        echo "[`$now`] Launching global_perf test...Done"
+        # echo "[`$now`] Launching global_perf test...Done"
 
-        echo "[`$now`] Launching Perf test...Done"
-        $script_path/wg_test_perf.sh $results_path $n_core $n_flow # 10 secs
+        # echo "[`$now`] Launching Perf test...Done"
+        # $script_path/wg_test_perf.sh $results_path $n_core $n_flow # 10 secs
         # sleep 5
 
         # echo "[`$now`] Launching sched trace test..."
@@ -169,9 +186,15 @@ for n_core in $ncore_set ; do
         duration=`bc <<< "( (($end_min - $start_min + 60) % 60 ) * 60 + $end - $start ) "`
         echo "[`$now`] trace-cmd start at $start_min:$start and end at $end_min:$end, so done in $duration secs. Sleeping for $(( {{ unit_time_s }} - duration ))..."
         sleep $(( {{ unit_time_s }} - duration ))
+        killall -s SIGINT sar
+        killall -s SIGINT pidstat
     done
 done
 
-cd /tmp/results
+cd ../
 
 done
+
+{% if wireguard_batch %}
+cd ../../
+{% endif %}

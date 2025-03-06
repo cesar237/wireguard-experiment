@@ -55,7 +55,7 @@ cd $res_path
 mkdir sar
 cd sar
 rm -f sar.data
-sar -A -o sar.data 1 60 > /dev/null
+sar -A -o sar.data 1 > /dev/null &
 cd ..
 
 # mkdir ethtool

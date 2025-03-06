@@ -30,8 +30,16 @@ nohup iptables -t nat -A POSTROUTING -o {{ iface }} -j MASQUERADE
 
 {% else %}
 
+
 {% if custom_kernel %}
+
+{% if custom_kernel_on == 'both' %}
 version={{ version_kernel }}
+{% elif custom_kernel_on == 'client' %}
+version=kernel-6.1
+{% elif custom_kernel_on == 'server' %}
+version={{ version_kernel }}
+{% endif %}
 
 # Check if /tmp/encryptonce directory exists, else clone the repo
 if [ ! -d /tmp/encryptonce ]; then

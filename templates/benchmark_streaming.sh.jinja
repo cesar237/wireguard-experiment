@@ -52,7 +52,7 @@ for run in $(seq 1 $runs); do
         sar -A -o sar-stream-$resolution-$run-up.data 1 > /dev/null &
         
         # start=$(date +%s.%N)
-        ffmpeg -i https://{{ target_index[ansible_nodename] }}/hls/$resolution/playlist.m3u8 -y -f mpeg /dev/null -report
+        taskset -c 0 ffmpeg -i https://{{ target_index[ansible_nodename] }}/hls/$resolution/playlist.m3u8 -y -f mpeg /dev/null -report
         # end=$(date +%s.%N)
 
         killall pidstat

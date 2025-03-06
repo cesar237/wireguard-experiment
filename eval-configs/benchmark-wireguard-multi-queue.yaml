@@ -49,7 +49,7 @@ all:
 
     # Wireguard type choice
     custom_kernel: true
-    version_kernel: kernel-6.1
+    version_kernel: wireguard-multi-queue
     custom_go: false
     version_go: partial_encrypt # partial_encrypt or no_encrypt
     wg_userspace: false

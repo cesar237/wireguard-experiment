@@ -33,12 +33,19 @@ done
 
 {% if custom_kernel %}
 
+{% if custom_kernel_on == 'both' %}
+version={{ version_kernel }}
+{% elif custom_kernel_on == 'client' %}
+version={{ version_kernel }}
+{% elif custom_kernel_on == 'server' %}
+version=kernel-6.1
+{% endif %}
+
 # Check if /tmp/encryptonce directory exists, else clone the repo
 if [ ! -d /tmp/encryptonce ]; then
     git clone https://github.com/cesar237/encryptonce /tmp/encryptonce
 fi
 
-version={{ version_kernel }}
 modprobe wireguard
 rmmod wireguard
 cd /tmp/encryptonce

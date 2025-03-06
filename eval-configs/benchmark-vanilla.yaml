@@ -5,6 +5,12 @@ all:
     nflow_set: "1 5 10 15 20"
     unit_time_s: 65
 
+    # batch params:
+    wireguard_batch: True
+    batch_sizes: [2, 4, 8, 16, 32]
+    concurrency_levels: [2, 4, 8, 16, 32]
+    custom_kernel_on: 'both'
+
     # Testing type choice
     test_iperf3: true
     test_netperf: false

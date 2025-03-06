@@ -1,0 +1,74 @@
+---
+- name: Gather all facts
+  hosts: all
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: Gather all facts
+      gather_facts:
+        parallel: true
+
+- name: Setup wireguard interfaces on clients and server
+  hosts: server
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: Activate server config
+      shell: /tmp/scripts/activate_wg.sh
+      ignore_errors: True
+    - name: Enable wireguard interfaces
+      ignore_errors: true
+      shell:
+        cmd: for i in `ls confs`; do nohup wg-quick up ~/confs/$i ; done
+    - name: Enable Ipv4 forwarding
+      shell:
+        cmd: sysctl net.ipv4.ip_forward=1
+
+- name: Setup wireguard interfaces on clients
+  hosts: clients
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: Activate server config
+      shell: /tmp/scripts/activate_wg.sh
+      ignore_errors: True
+    - name: Enable wireguard interfaces
+      ignore_errors: true
+      shell:
+        cmd: for conf in `ls ~/confs`; do wg-quick up ~/confs/$conf; done
+    - name: Remove possible existing route to target
+      ignore_errors: true
+      shell: 
+        cmd: ip route del {{ hostvars[target_index[ansible_nodename]]['ansible_default_ipv4']['address'] }}
+    - name: Add route to target
+      ignore_errors: true
+      shell: 
+        cmd: ip route add {{ hostvars[target_index[ansible_nodename]]['ansible_default_ipv4']['address'] }} via {{ server_address }}
+  
+- name: Prepare scripts
+  hosts: [server, clients]
+  remote_user: "{{ username }}"
+  gather_facts: false
+
+  tasks:
+    - name: Make all scripts executable
+      shell:
+        cmd: chmod +x -R /tmp/scripts
+    - name: Delete results directory
+      ignore_errors: true
+      shell:
+        cmd: rm -r /tmp/results && mkdir -p /tmp/results
+    
+    - name: Launch test script
+      shell: |
+        export wg_batch_size={{ item[0] }}
+        export concurrency_level={{ item[1] }}
+
+        /tmp/scripts/activate_wg.sh
+        for conf in `ls ~/confs`; do wg-quick up confs/$conf; done
+
+        nohup /tmp/scripts/test.sh >> test.log 2>&1 
+      loop: "{{ batch_sizes | product(concurrency_levels) | list }}"

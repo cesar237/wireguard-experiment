@@ -45,6 +45,23 @@ ncore_set=`nproc`
 ncore_set="18"
 {% endif %}
 
+{% if wireguard_batch %}
+params_path=/sys/module/wireguard/parameters
+
+{% if custom_kernel_on == 'both' %}
+echo $wg_batch_size > $params_path/wg_batch_size
+echo $concurrency_level > $params_path/concurrency_level
+{% elif custom_kernel_on == 'client' %}
+echo $wg_batch_size > $params_path/wg_batch_size
+echo $concurrency_level > $params_path/concurrency_level
+{% elif custom_kernel_on == 'server' %}
+echo Not batched kernel version...
+{% endif %}
+
+path=batch-$wg_batch_size/concurrency-$concurrency_level
+mkdir -p $path
+cd $path
+{% endif %}
 
 for run in `seq 1 {{runs}}`; do
 mkdir -p run-$run
@@ -104,7 +121,7 @@ for n_core in $ncore_set ; do
             {% if throughput_test == "IPERF" %}
             iperf3 -c {{ target_index[ansible_nodename] }} -b {{ bandwidth }} -l {{ packet_size }}  -p $(( 12865 + $i )) -t 0 --bind-dev $iface $iperf3_BI $iperf3_DOWN --logfile iperf3-$i.log &
             {% endif %}
-            
+
             {% if throughput_test == "NETPERF" %}
             netperf -H {{ target_index[ansible_nodename] }} -t ${TYPE}_${DIRECTION} -L $ip_addr -l {{ unit_time_s }} -D 1 -f m -p $(( 13865 + $i )) > netperf_$i.log &
             {% endif %}
@@ -138,3 +155,7 @@ done
 cd ..
 
 done
+
+{% if wireguard_batch %}
+cd ../../
+{% endif %}
