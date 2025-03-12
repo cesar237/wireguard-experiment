@@ -16,23 +16,11 @@
     - name: Send client keypairs         
       template:
         src: ../static/keypairs.json
-        dest: keypairs.json
-    - name: Send median_val.py         
-      template:
-        src: ../templates/median_val.py
-        dest: /tmp/median_val.py                    
+        dest: keypairs.json                  
     - name: Send server keypairs         
       template:
         src: ../static/server_keypairs.json          
         dest: server_keypairs.json
-    - name: Send convert_to_csv script
-      template:
-        src: ../templates/convert_to_csv.py
-        dest: /tmp/scripts/convert_to_csv.py
-    - name: Send requirements for convert_to_csv script
-      template:
-        src: ../templates/requirements.txt
-        dest: /tmp/scripts/requirements.txt
     - name: Send cpu_set.sh
       template:
         src: ../templates/cpu_set.sh
