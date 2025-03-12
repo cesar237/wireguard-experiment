@@ -2,8 +2,8 @@
 all:
   vars:
     ncore_set: "36"
-    nflow_set: "1 5 10 15 20"
-    unit_time_s: 65
+    nflow_set: [1, 25, 50, 75, 100]
+    unit_time_s: 60
 
     # batch params:
     wireguard_batch: True
@@ -67,7 +67,7 @@ all:
     apply_sched_policy: false
     sched_policy: "-o" # -o for default, -b for batch, -f for fifo, -r for round robin, -d for deadline
     sched_priority: 0 # 0 for default and batch, 1 for fifo and round robin
-    runs: 10
+    runs: 1
     wait_server: 0
-    wait_client: 3
+    wait_client: 2
     

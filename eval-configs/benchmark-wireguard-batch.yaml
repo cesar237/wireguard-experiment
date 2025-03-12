@@ -2,8 +2,8 @@
 all:
   vars:
     ncore_set: "36"
-    nflow_set: "1 5 10 15 20"
-    unit_time_s: 10
+    nflow_set: [1, 25, 50, 75, 100]
+    unit_time_s: 60
 
     # batch params:
     wireguard_batch: True
@@ -45,7 +45,7 @@ all:
     smt: "off"
 
     # SOCKPERF args
-    PPS: 6500 #per client throuhgput in pps, used with SOCKPERF
+    PPS: 12500 #per client throuhgput in pps, used with SOCKPERF
     SOCKPERF_TRAFFIC: tcp # tcp|udp test
     MSG_LEN: 1500
 

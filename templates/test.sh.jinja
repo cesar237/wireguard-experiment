@@ -9,7 +9,6 @@ irqbalanced={{ irqbalanced }}
 now="date +%H:%M:%S"
 
 # Delete residual data
-rm -r /tmp/results*
 rm /tmp/outputs.zip
 rm /tmp/data.zip
 rm -rv ~/go*
@@ -102,6 +101,8 @@ sysctl fs.inotify.max_user_instances=8192
 sysctl fs.inotify.max_user_watches=524288
 sysctl -p
 
+cd /tmp/results
+
 {% if wireguard_batch %}
 params_path=/sys/module/wireguard/parameters
 
@@ -116,16 +117,16 @@ echo $concurrency_level > $params_path/concurrency_level
 {% endif %}
 
 path=batch-$wg_batch_size/concurrency-$concurrency_level
-mkdir -p $path
-cd $path
+mkdir -p /tmp/results/$path
+cd /tmp/results/$path
+results_path=/tmp/results/$path
 {% endif %}
 
 for run in `seq 1 {{ runs }}`; do
-cd /tmp/results
 mkdir -p run-$run
 cd run-$run
 echo "[`$now`] Launching tests RUN=$run..."
-results_path={{ results_path }}/run-$run
+# results_path={{ results_path }}/run-$run
 
 echo 96000 > buffer_size_kb
 
@@ -133,8 +134,9 @@ echo 96000 > buffer_size_kb
 
 for n_core in $ncore_set ; do
     echo "[`$now`] Test_case: n_core=$n_core"
-    root_path=$results_path;
-    mkdir -p $root_path;
+    # root_path=$results_path;
+    mkdir -p CPU-$n_core;
+    cd CPU-$n_core
 
     if [ "$n_core" -eq "18" ]; then
         echo off > /sys/devices/system/cpu/smt/control
@@ -147,7 +149,10 @@ for n_core in $ncore_set ; do
     #    echo 0 > /sys/devices/system/cpu/cpu$i/online
     #done
 
-    for n_flow in {{ nflow_set }}; do
+    for n_flow in {{ nflow_set | join(" ") }}; do
+        mkdir -p nflow-$n_flow
+        cd nflow-$n_flow
+        
         SECONDS=0
         start=`date +%S`
         start_min=`date +%M`
@@ -160,17 +165,18 @@ for n_core in $ncore_set ; do
 
         sleep $wait_before_start
 
-        mkdir -p /tmp/results/run-$run/$n_core/$n_flow
+        mkdir -p $results_path/run-$run/$n_core/$n_flow
+        res_dir=$results_path/run-$run
 
         echo "[`$now`] Test_case: n_flow=$n_flow"
 
         echo "[`$now`] Launching global_perf test..."
         # sleep 10
-        $script_path/wg_test_global_perf.sh $results_path $n_core $n_flow
+        $script_path/wg_test_global_perf.sh $res_dir $n_core $n_flow
 
         echo "[`$now`] Launching global_perf test..."
         # sleep 10
-        $script_path/wg_test_cpu_pidstat.sh $results_path $n_core $n_flow
+        $script_path/wg_test_cpu_pidstat.sh $res_dir $n_core $n_flow
 
         # echo "[`$now`] Launching global_perf test...Done"
 
@@ -188,13 +194,13 @@ for n_core in $ncore_set ; do
         sleep $(( {{ unit_time_s }} - duration ))
         killall -s SIGINT sar
         killall -s SIGINT pidstat
+
+        cd ..
     done
+
+    cd..
 done
 
 cd ../
 
 done
-
-{% if wireguard_batch %}
-cd ../../
-{% endif %}

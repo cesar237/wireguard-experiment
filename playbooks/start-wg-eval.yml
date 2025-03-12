@@ -75,11 +75,9 @@
     
     - name: Launch test script
       shell: |
-        export wg_batch_size={{ item[0] }}
-        export concurrency_level={{ item[1] }}
 
-        /tmp/scripts/activate_wg.sh
-        for conf in `ls ~/confs`; do wg-quick up ~/confs/$conf; done
+        # /tmp/scripts/activate_wg.sh
+        # for conf in `ls ~/confs`; do wg-quick up ~/confs/$conf; done
 
         nohup /tmp/scripts/test.sh >> test.log 2>&1 
-      loop: "{{ batch_sizes | product(concurrency_levels) | list }}"
+      # loop: "{{ nflow_set | product(range(1, runs+1)) | list }}"

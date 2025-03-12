@@ -28,7 +28,6 @@ now="date +%H:%M:%S"
 offset={{ (index[ansible_nodename] - 1)*batch }}
 
 # Delete residual data
-rm -r /tmp/results
 rm /tmp/client-data.zip
 rm -rv ~/go*
 
@@ -92,7 +91,7 @@ for n_core in $ncore_set ; do
     cd CPU-$n_core
 
     mod=nflow
-    for n_flow in {{ nflow_set }}; do
+    for n_flow in {{ nflow_set | join(" ") }}; do
         killall -s SIGINT iperf3
         killall netperf
 
@@ -155,7 +154,3 @@ done
 cd ..
 
 done
-
-{% if wireguard_batch %}
-cd ../../
-{% endif %}
