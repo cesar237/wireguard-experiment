@@ -92,10 +92,6 @@
       template:
         src: ../templates/benchmark_scp.sh.jinja
         dest: /tmp/scripts/benchmark_scp.sh
-    - name: Send median_val.py         
-      template:
-        src: ../templates/median_val.py
-        dest: /tmp/median_val.py
     - name: Send script for sockperf installation
       template:
         src: ../templates/install_sockperf.sh
