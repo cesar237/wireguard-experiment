@@ -10,3 +10,5 @@ poc.zip
 hot-reload-dir.sh
 poc/
 install_dpdk.sh
+template/dash-video.zip
+template/hls-video.zip
