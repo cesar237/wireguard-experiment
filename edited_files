@@ -1,5 +1,0 @@
-templates/convert_to_csv.py
-templates/init_server.sh
-templates/wg_gen_client_conf.py
-templates/wg_gen_server_conf.py
-templates/wg_test_global_perf.sh
