@@ -1,0 +1,99 @@
+#!/bin/bash
+
+# Parameters:
+#   - NR_CLIENTS: 1 25 50 75 100
+#   - BATCH_SIZES: 2 4 8 16
+#   - NR_RINGS: 2 4 8 16
+#   - WG_VARIANT: kernel-6.1(vanilla), wireguard-no-queue, wireguard-batch-multi-queue-table(batch and multi-queue), wireguard-batch-multi-queue-steer-client
+
+function run_throughput_eval(){
+    # usage: run_throughput_eval n_clients mps duration
+    n=$1
+    for i in `seq 1 $n`; do
+        sockperf tp --mps=$2 --tcp -i {{ target_index[ansible_nodename] }} -p $(( 24000 + i)) -t $3 -m 1400 --client_ip 192.168.1.$((i+1)) > tp_$i.log &
+    done
+}
+
+function run_perf_eval(){
+    # usage: run_throughput_eval n_clients mps duration
+    n=$1
+    for i in `seq 1 $n`; do
+        sockperf tp --mps=$2 --tcp -i {{ target_index[ansible_nodename] }} -p $(( 24000 + i)) -t $3 -m 1400 --client_ip 192.168.1.$((i+1)) > tp_$i.perf &
+    done
+}
+
+function run_latency_eval(){
+    # usage: run_throughput_eval n_clients mps duration
+    n=$1
+    for i in `seq 1 $n`; do
+        sockperf ul --mps=$2 --tcp -i {{ target_index[ansible_nodename] }} -p $(( 24000 + i)) -t $3 -m 1400 --client_ip 192.168.1.$((i+1)) > ul_$i.log &
+    done
+}
+
+NR_CLIENTS="{{ nflow_set | join(" ") }}"
+BATCH_SIZES="{{ batch_sizes | join(" ") }}"
+NR_RINGS="{{ nr_rings | join(" ") }}"
+
+with_batch_sizes=0
+with_nr_rings=0
+
+{% if with_batch_sizes %}
+with_batch_sizes=1
+{% endif %}
+
+{% if with_nr_rings %}
+with_nr_rings=1
+{% endif %}
+
+resdir=/tmp/results
+mkdir -p $resdir
+cd $resdir
+
+for clients in $NR_CLIENTS; do
+    mkdir -p nflow-$clients
+    cd nflow-$clients
+
+    {% if with_batch_sizes %}
+    for batch in $BATCH_SIZES; do
+        mkdir -p batch-$batch
+        cd batch-$batch
+    {% endif %}
+
+    {% if with_nr_rings %}
+    for rings in $NR_RINGS; do
+        mkdir -p ring-$rings
+        cd ring-$rings
+    {% endif %}
+
+    SECONDS=0
+    start=`date +%S`
+    start_min=`date +%M`
+
+    sleep {{ wait_client }}
+
+    run_throughput_eval $clients {{mps}} {{ unit_time_s }}
+    sleep {{ unit_time_s }}
+
+    run_latency_eval $clients {{mps}} {{ unit_time_s }}
+    sleep {{ unit_time_s }}
+
+    run_perf_eval $clients {{mps}} 60
+    sleep 30
+
+    end=`date +%S`
+    end_min=`date +%M`
+    duration=`bc <<< "( (($end_min - $start_min + 60) % 60 ) * 60 + $end - $start ) "`
+    sleep $(( 2 * {{ unit_time_s }} + 10 + 60 - duration ))
+
+    {% if with_nr_rings %}
+        cd ..
+    done
+    {% endif %}
+
+    {% if with_batch_sizes %}
+        cd ..
+    done
+    {% endif %}
+
+    cd ..
+done

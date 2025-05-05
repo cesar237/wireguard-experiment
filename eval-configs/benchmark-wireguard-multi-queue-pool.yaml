@@ -8,13 +8,13 @@ all:
 
     # batch params:
     with_batch_sizes: True
-    batch_sizes: [2, 4, 8, 16]
+    batch_sizes: [1]
     concurrency_levels: [4, 8, 16, 32]
     custom_kernel_on: 'server'
 
     # Multi queue param:
     with_nr_rings: True
-    nr_rings: [1]
+    nr_rings: [2, 4, 8, 18]
 
     # Testing type choice
     test_iperf3: true

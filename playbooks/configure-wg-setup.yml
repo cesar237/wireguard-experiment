@@ -31,6 +31,10 @@
       template:
         src: ../templates/test.sh.jinja
         dest: /tmp/scripts/test.sh
+    - name: Send bench.sh script
+      template:
+        src: ../templates/server-bench.sh.jinja
+        dest: /tmp/scripts/bench.sh
 
 - name: Resend test script to clients
   hosts: clients
@@ -42,6 +46,10 @@
       template:
         src: ../templates/client_gen.sh.jinja
         dest: /tmp/scripts/test.sh
+    - name: Send bench.sh script
+      template:
+        src: ../templates/client-bench.sh.jinja
+        dest: /tmp/scripts/bench.sh
 
 - name: Include Wireguard Setup playbook
   import_playbook: "setup-wireguard.yml"

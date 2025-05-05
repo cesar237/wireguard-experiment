@@ -3,18 +3,25 @@ all:
   vars:
     ncore_set: "36"
     nflow_set: [100]
-    unit_time_s: 120
-    mps: 22300
+    unit_time_s: 30
+    mps: max
+
+    # IPVS options
+    server_ip: 172.16.66.80
+    target_ip: 172.16.66.83
+    client_ip: 172.16.66.86
+    simulated_latency: 0
+    algos: "rr sh dh lc nq"
 
     # batch params:
-    with_batch_sizes: True
+    with_batch_sizes: False
     batch_sizes: [2, 4, 8, 16]
     concurrency_levels: [4, 8, 16, 32]
-    custom_kernel_on: 'server'
+    custom_kernel_on: 'both'
 
     # Multi queue param:
-    with_nr_rings: True
-    nr_rings: [1]
+    with_nr_rings: False
+    nr_rings: [2, 4, 8, 18]
 
     # Testing type choice
     test_iperf3: true
@@ -60,7 +67,7 @@ all:
 
     # Wireguard type choice
     custom_kernel: true
-    version_kernel: wireguard-batch-multi-queue-table
+    version_kernel: kernel-6.1
     custom_go: false
     version_go: partial_encrypt # partial_encrypt or no_encrypt
     wg_userspace: false
@@ -74,5 +81,5 @@ all:
     sched_priority: 0 # 0 for default and batch, 1 for fifo and round robin
     runs: 1
     wait_server: 0
-    wait_client: 0
+    wait_client: 3
     

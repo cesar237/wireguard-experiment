@@ -1,0 +1,96 @@
+#!/bin/bash
+
+function set_wg_param(){
+    param=$1
+    value=$2
+    echo $value > /sys/module/wireguard/parameters/$param
+}
+
+# Parameters:
+#   - NR_CLIENTS: 1 25 50 75 100
+#   - BATCH_SIZES: 2 4 8 16
+#   - NR_RINGS: 2 4 8 16
+#   - WG_VARIANT: kernel-6.1(vanilla), wireguard-no-queue, wireguard-batch-multi-queue-table(batch and multi-queue), wireguard-batch-multi-queue-steer-client
+WG_VARIANT={{ version_kernel }}
+
+NR_CLIENTS="{{ nflow_set | join(" ") }}"
+BATCH_SIZES="{{ batch_sizes | join(" ") }}"
+NR_RINGS="{{ nr_rings | join(" ") }}"
+
+with_batch_sizes=0
+with_nr_rings=0
+
+{% if with_batch_sizes %}
+with_batch_sizes=1
+{% endif %}
+
+{% if with_nr_rings %}
+with_nr_rings=1
+{% endif %}
+
+resdir=/tmp/results
+mkdir -p $resdir
+cd $resdir
+
+PERF_EVENTS="cache-misses,cache-references,cs,migrations,faults,L1-dcache-load-misses,L1-dcache-loads,LLC-load-misses,LLC-loads,LLC-stores,LLC-store-misses"
+
+for clients in $NR_CLIENTS; do
+    mkdir -p nflow-$clients
+    cd nflow-$clients
+
+    {% if with_batch_sizes %}
+    for batch in $BATCH_SIZES; do
+        set_wg_param wg_batch_size $batch
+        mkdir -p batch-$batch
+        cd batch-$batch
+    {% endif %}
+
+    {% if with_nr_rings %}
+    for rings in $NR_RINGS; do
+        set_wg_param wg_nr_rings $rings
+        mkdir -p ring-$rings
+        cd ring-$rings
+    {% endif %}
+
+    SECONDS=0
+    start=`date +%S`
+    start_min=`date +%M`
+
+    sleep {{ wait_server }}
+
+    pidstat 1 {{ unit_time_s }} > pidstat.log &
+    sar -A -o sar.data 1 {{ unit_time_s }} > /dev/null &
+    sleep {{ unit_time_s }}
+    killall pidstat
+    # killall sar
+
+    sleep {{ unit_time_s }}
+
+    perf record -F 998 -a -g -e $PERF_EVENTS -- sleep 5 &
+
+    sleep 20
+
+    trace-cmd record -p nop -- sleep 5 &
+
+    sleep 30
+
+    perf script > out.perf
+    perf report --stats > out-stats.perf
+
+    end=`date +%S`
+    end_min=`date +%M`
+    duration=`bc <<< "( (($end_min - $start_min + 60) % 60 ) * 60 + $end - $start ) "`
+    sleep $(( 2 * {{ unit_time_s }} + 10 + 60 - duration ))
+
+    {% if with_nr_rings %}
+        cd ..
+    done
+    {% endif %}
+
+    {% if with_batch_sizes %}
+        cd ..
+    done
+    {% endif %}
+
+    cd ..
+done

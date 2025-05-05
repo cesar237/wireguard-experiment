@@ -69,6 +69,10 @@
       template:
         src: ../templates/test.sh.jinja
         dest: /tmp/scripts/test.sh
+    - name: Send test.sh script
+      template:
+        src: ../templates/server-bench.sh.jinja
+        dest: /tmp/scripts/bench.sh
     - name: Make all scripts executable
       shell:
         cmd: chmod +x -R /tmp/scripts
@@ -112,6 +116,10 @@
       template:
         src: ../templates/client_gen.sh.jinja
         dest: /tmp/scripts/test.sh
+    - name: Send client generator script
+      template:
+        src: ../templates/client-bench.sh.jinja
+        dest: /tmp/scripts/bench.sh
     - name: Send limit_bandwidth script
       template:
         src: ../templates/limit_bandwidth.sh.jinja

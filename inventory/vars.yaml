@@ -11,8 +11,8 @@ all:
     username_target: root
     username: root
     iface: eno1 # eno1 for nancy and ens10f0np0 for rennes 
-    n_clients: 100
-    batch: 100
+    n_clients: 150
+    batch: 150
 
     throughput_test: SOCKPERF # IPERF or NETPERF or SOCKPERF
     limited_bandwidth: false

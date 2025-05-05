@@ -3,18 +3,17 @@ all:
   vars:
     ncore_set: "36"
     nflow_set: [100]
-    unit_time_s: 120
-    mps: 22300
+    unit_time_s: 80
 
     # batch params:
-    with_batch_sizes: True
-    batch_sizes: [2, 4, 8, 16]
-    concurrency_levels: [4, 8, 16, 32]
+    wireguard_batch: True
+    batch_sizes: [2, 4, 8, 16, 32]
+    concurrency_levels: [2, 4, 8, 16, 32]
     custom_kernel_on: 'server'
 
     # Multi queue param:
-    with_nr_rings: True
-    nr_rings: [1]
+    wireguard_multi_queue: True
+    wg_nr_rings: [2, 4, 8, 18]
 
     # Testing type choice
     test_iperf3: true
@@ -60,7 +59,7 @@ all:
 
     # Wireguard type choice
     custom_kernel: true
-    version_kernel: wireguard-batch-multi-queue-table
+    version_kernel: wireguard-multi-queue-table
     custom_go: false
     version_go: partial_encrypt # partial_encrypt or no_encrypt
     wg_userspace: false

@@ -3,7 +3,8 @@
 # $3: The number of input flows
 
 root_path=$1
-res_path=$root_path/CPU-$2/nflow-$3 
+# res_path=$root_path/CPU-$2/nflow-$3 
+res_path=$1
 ftrace_path=/sys/kernel/debug/tracing
 now="date +%H:%M:%S"
 
@@ -14,7 +15,7 @@ cd $res_path
 mkdir sar
 cd sar
 rm -f sar.data
-sar -A -o sar.data 1 > /dev/null &
+sar -A -o sar.data 1 25 > /dev/null
 cd ..
 
 

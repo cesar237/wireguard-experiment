@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Parameters:
+#   - NR_CLIENTS: 1 25 50 75 100
+#   - BATCH_SIZES: 2 4 8 16
+#   - NR_RINGS: 2 4 8 16
+#   - WG_VARIANT: kernel-6.1(vanilla), wireguard-no-queue, wireguard-batch-multi-queue-table(batch and multi-queue), wireguard-batch-multi-queue-steer-client
+
+function run_throughput_eval(){
+    target="{{ server_ip }}"
+    n=$1
+    mps=$2
+    duration=$3
+    # port=$4
+    for i in `seq 1 $n`; do
+        sockperf tp --mps=$mps --tcp -i $target -t $duration -p 12345 -m 1400 > tp_$i.log &
+    done
+}
+
+function run_latency_eval(){
+    target="{{ server_ip }}"
+    n=$1
+    mps=$2
+    duration=$3
+    # port=$4
+    for i in `seq 1 $n`; do
+        sockperf ul --mps=$mps --tcp -i $target -p 12345 -t $duration -m 1400 > ul_$i.log &
+    done   
+}
+
+NR_CLIENTS="{{ nflow_set | join(" ") }}"
+ALGOS="{{ algos }}"
+
+resdir=/tmp/results
+mkdir -p $resdir
+cd $resdir
+
+for clients in $NR_CLIENTS; do
+    mkdir -p nflow-$clients
+    cd nflow-$clients
+
+    for algo in $ALGOS; do
+        mkdir -p algo-$algo
+        cd algo-$algo
+
+        SECONDS=0
+        start=`date +%S`
+        start_min=`date +%M`
+
+        sleep {{ wait_client }}
+
+        run_throughput_eval $clients max {{ unit_time_s }}
+        sleep {{ unit_time_s }}
+
+        run_latency_eval $clients max {{ unit_time_s }}
+        sleep {{ unit_time_s }}
+
+        end=`date +%S`
+        end_min=`date +%M`
+        duration=`bc <<< "( (($end_min - $start_min + 60) % 60 ) * 60 + $end - $start ) "`
+        sleep $(( 2 * {{ unit_time_s }} + 10 - duration ))
+        
+        cd ../
+    done
+
+    cd ..
+done

@@ -1,0 +1,64 @@
+#!/bin/bash
+
+function set_mod_param(){
+    module=$1
+    param=$2
+    value=$3
+    echo $value > /sys/module/$module/parameters/$param
+}
+
+# Parameters:
+#   - NR_CLIENTS: 1 25 50 75 100
+#   - BATCH_SIZES: 2 4 8 16
+#   - NR_RINGS: 2 4 8 16
+#   - WG_VARIANT: kernel-6.1(vanilla), wireguard-no-queue, wireguard-batch-multi-queue-table(batch and multi-queue), wireguard-batch-multi-queue-steer-client
+
+NR_CLIENTS="{{ nflow_set | join(" ") }}"
+ALGOS="{{ algos }}"
+
+echo off > /sys/devices/system/cpu/smt/control
+
+# Configure test_new for latency
+chmod +x /tmp/poc/run.sh
+/tmp/poc/run.sh {{ simulated_latency }} {{ client_ip }} {{ server_ip }}
+
+resdir=/tmp/results
+mkdir -p $resdir
+cd $resdir
+
+for clients in $NR_CLIENTS; do
+    mkdir -p nflow-$clients
+    cd nflow-$clients
+
+    for algo in $ALGOS; do
+        mkdir -p algo-$algo
+        cd algo-$algo
+
+        SECONDS=0
+        start=`date +%S`
+        start_min=`date +%M`
+
+        # Reconfigure ipvs
+        chmod +x /tmp/poc/config_ipvs.sh
+        /tmp/poc/config_ipvs.sh $algo {{ server_ip }} {{ target_ip }}
+
+        sleep {{ wait_server }}
+
+        pidstat 1 > pidstat.log &
+        sar -A -o sar.data 1 > /dev/null &
+        sleep {{ unit_time_s }}
+        killall pidstat
+        killall sar
+
+        sleep {{ unit_time_s }}
+
+        end=`date +%S`
+        end_min=`date +%M`
+        duration=`bc <<< "( (($end_min - $start_min + 60) % 60 ) * 60 + $end - $start ) "`
+        sleep $(( 2 * {{ unit_time_s }} + 10 - duration ))
+
+        cd ../
+    done
+
+    cd ..
+done

@@ -44,28 +44,31 @@ ncore_set=`nproc`
 ncore_set="18"
 {% endif %}
 
-{% if wireguard_batch %}
-params_path=/sys/module/wireguard/parameters
-
-{% if custom_kernel_on == 'both' %}
-echo $wg_batch_size > $params_path/wg_batch_size
-echo $concurrency_level > $params_path/concurrency_level
-{% elif custom_kernel_on == 'client' %}
-echo $wg_batch_size > $params_path/wg_batch_size
-echo $concurrency_level > $params_path/concurrency_level
-{% elif custom_kernel_on == 'server' %}
-echo Not batched kernel version...
-{% endif %}
-
-path=batch-$wg_batch_size/concurrency-$concurrency_level
-mkdir -p $path
-cd $path
-{% endif %}
-
 for run in `seq 1 {{runs}}`; do
 mkdir -p run-$run
 cd run-$run
 echo "[`$now`] Launching tests RUN=$run..."
+
+{% if with_batch_sizes %}
+params_path=/sys/module/wireguard/parameters
+for wg_batch_size in {{ batch_sizes | join(" ") }}; do
+for concurrency_level in {{ concurrency_levels | join(" ") }}; do
+
+path=batch-$wg_batch_size/concurrency-$concurrency_level
+mkdir -p $path
+cd $path
+res_dir=`pwd`
+{% endif %}
+
+{% if with_nr_rings %}
+params_path=/sys/module/wireguard/parameters
+for wg_nr_ring in {{ nr_rings | join(" ") }}; do
+
+path=ring-$wg_nr_ring
+mkdir -p $path
+cd $path
+res_dir=`pwd`
+{% endif %}
 
 killall -s SIGINT iperf3
 killall netperf
@@ -82,10 +85,6 @@ DIRECTION=MAERTS
 DIRECTION=STREAM
 {% endif %}
 
-sysctl fs.inotify.max_user_instances=8192
-sysctl fs.inotify.max_user_watches=524288
-sysctl -p
-
 for n_core in $ncore_set ; do
     mkdir -p CPU-$n_core
     cd CPU-$n_core
@@ -99,13 +98,61 @@ for n_core in $ncore_set ; do
         mkdir -p $mod-$n_flow
         cd $mod-$n_flow
 
+        # killall iperf3
+        killall sockperf
+
         mkdir sar
         cd sar
         rm -f sar.data
 
-        # killall iperf3
+        SECONDS=0
+        start=`date +%S`
+        start_min=`date +%M`
         pre_heat={{ wait_client }}
         sleep $pre_heat
+
+        {% if with_batch_sizes %}
+        {% if custom_kernel_on == 'both' %} 
+        echo $wg_batch_size > $params_path/wg_batch_size
+        echo $concurrency_level > $params_path/concurrency_level
+        for conf in `ls ~/confs`; do wg-quick down ~/confs/$conf; done
+        for conf in `ls ~/confs`; do wg-quick up ~/confs/$conf; done
+
+        {% elif custom_kernel_on == 'client' %}
+        echo Not batched kernel version...
+
+        {% elif custom_kernel_on == 'server' %}
+        echo $wg_batch_size > $params_path/wg_batch_size
+        echo $concurrency_level > $params_path/concurrency_level
+        for conf in `ls ~/confs`; do wg-quick down ~/confs/$conf; done
+        for conf in `ls ~/confs`; do wg-quick up ~/confs/$conf; done
+        {% endif %}
+        {% endif %}
+
+        {% if with_nr_rings %}
+        {% if custom_kernel_on == 'both' %} 
+        echo $wg_nr_ring > $params_path/wg_nr_rings
+        for conf in `ls ~/confs`; do wg-quick down ~/confs/$conf; done
+        rmmod wireguard
+        insmod /tmp/encryptonce/wireguard.ko
+        for conf in `ls ~/confs`; do wg-quick up ~/confs/$conf; done
+
+        {% elif custom_kernel_on == 'client' %}
+        echo Not batched kernel version...
+
+        {% elif custom_kernel_on == 'server' %}
+        echo $wg_nr_ring > $params_path/wg_nr_rings
+        for conf in `ls ~/confs`; do wg-quick down ~/confs/$conf; done
+        rmmod wireguard
+        insmod /tmp/encryptonce/wireguard.ko
+        for conf in `ls ~/confs`; do wg-quick up ~/confs/$conf; done
+        {% endif %}
+        {% endif %}
+    
+        left=`date +%S`
+        left_min=`date +%M`
+        left_duration=`bc <<< "( (($left_min - $start_min + 60) % 60 ) * 60 + $left - $start ) "`
+
         # sleep $(( {{ index[ansible_nodename] * 0.5 }} ))
         echo [`$now`] Starting netperf of $n_flow clients...
         for i in `seq 1 $n_flow`; do
@@ -126,7 +173,9 @@ for n_core in $ncore_set ; do
             {% endif %}
 
             {% if throughput_test == "SOCKPERF" %}
-            /usr/bin/sockperf ul --mps={{ PPS }} --{{SOCKPERF_TRAFFIC}} -i {{ target_index[ansible_nodename] }} -p $(( 24000 + $i)) -t $(( {{ unit_time_s }} - pre_heat )) -m {{MSG_LEN}} --client_ip $ip_addr > sockperf_$i.log &
+            /usr/bin/sockperf ul --dontwarmup --mps={{ PPS }} --{{SOCKPERF_TRAFFIC}} -i {{ target_index[ansible_nodename] }} -p $(( 24000 + $i)) -t $(( {{ unit_time_s }} - left_duration - 2 )) -m {{MSG_LEN}} --client_ip $ip_addr > sockperf_$i.log
+
+            /usr/bin/sockperf tp --dontwarmup --mps={{ PPS }} --{{SOCKPERF_TRAFFIC}} -i {{ target_index[ansible_nodename] }} -p $(( 24000 + $i)) -t $(( {{ unit_time_s }} - left_duration - 2 )) -m {{MSG_LEN}} --client_ip $ip_addr > sockperf_$i.log.tp &
             {% endif %}
 
             {% if include_latency %}
@@ -136,9 +185,16 @@ for n_core in $ncore_set ; do
             done
             {% endif %}
         done
-        sar -A -o sar.data 1 $(( {{ unit_time_s }} - pre_heat )) > /dev/null
+        sar -A -o sar.data 1 $(( {{ unit_time_s }} - left_duration - 2 )) > /dev/null &
+        
+        end=`date +%S`
+        end_min=`date +%M`
+        duration=`bc <<< "( (($end_min - $start_min + 60) % 60 ) * 60 + $end - $start ) "`
+        sleep $(( 2 * {{ unit_time_s }} - duration ))
         killall -s SIGINT iperf3
         killall -s SIGINT netperf
+        killall -s SIGINT sockperf
+        killall -s SIGINT sar
         cd ..
         echo [`$now`] Done!
         cd ..
@@ -148,9 +204,21 @@ for n_core in $ncore_set ; do
     echo
     cd .. 
     killall -s SIGINT iperf3
-    killall netperf
+    killall -s SIGINT netperf
+    killall -s SIGINT sockperf
+    killall -s SIGINT sar
 done
 
-cd ..
+{% if with_nr_rings %}
+cd ../
+done
+{% endif %}
 
+{% if with_batch_sizes %}
+cd ../../
+done
+done
+{% endif %}
+
+cd ..
 done

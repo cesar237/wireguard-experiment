@@ -5,3 +5,8 @@ inventory/hosts.yaml
 results/*
 static/index.json
 static/target_index.json
+dpdk-stable-24.11.1/
+poc.zip
+hot-reload-dir.sh
+poc/
+install_dpdk.sh

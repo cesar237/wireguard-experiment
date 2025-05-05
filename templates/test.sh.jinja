@@ -8,13 +8,6 @@ test_duration={{ unit_time_s }}
 irqbalanced={{ irqbalanced }}
 now="date +%H:%M:%S"
 
-# Delete residual data
-rm /tmp/outputs.zip
-rm /tmp/data.zip
-rm -rv ~/go*
-
-cpupower frequency-set -g performance
-
 {% if all_on_core_0 %}
 echo "Redirecting all interrupts on core 0...."
 first_irq=`cat /proc/interrupts | grep "pci:0000:18:00.0" | awk '{ print $1 }' | tr ':' ' '`
@@ -70,7 +63,7 @@ ncore_set="18"
 echo {{ smt }} > /sys/devices/system/cpu/smt/control
 {% endif %}
 
-echo {{ threaded }} > /sys/class/net/wg/threaded
+# echo {{ threaded }} > /sys/class/net/wg/threaded
 
 {% if pinned_napi %}
 count=0
@@ -97,86 +90,104 @@ done
 irqbalance -t 1 -d > /tmp/results/run-$run/$n_core/$n_flow/irqbalance.log &
 {% endif %}
 
-sysctl fs.inotify.max_user_instances=8192
-sysctl fs.inotify.max_user_watches=524288
-sysctl -p
-
 cd /tmp/results
 
-{% if wireguard_batch %}
-params_path=/sys/module/wireguard/parameters
-
-{% if custom_kernel_on == 'both' %}
-echo $wg_batch_size > $params_path/wg_batch_size
-echo $concurrency_level > $params_path/concurrency_level
-{% elif custom_kernel_on == 'client' %}
-echo Not batched kernel version...
-{% elif custom_kernel_on == 'server' %}
-echo $wg_batch_size > $params_path/wg_batch_size
-echo $concurrency_level > $params_path/concurrency_level
-{% endif %}
-
-path=batch-$wg_batch_size/concurrency-$concurrency_level
-mkdir -p /tmp/results/$path
-cd /tmp/results/$path
-results_path=/tmp/results/$path
-{% endif %}
+mkdir -p /tmp/results
+cd /tmp/results
+results_path=/tmp/results
 
 for run in `seq 1 {{ runs }}`; do
 mkdir -p run-$run
 cd run-$run
 echo "[`$now`] Launching tests RUN=$run..."
-# results_path={{ results_path }}/run-$run
 
-echo 96000 > buffer_size_kb
+{% if with_batch_sizes %}
+params_path=/sys/module/wireguard/parameters
+for wg_batch_size in {{ batch_sizes | join(" ") }}; do
+for concurrency_level in {{ concurrency_levels | join(" ") }}; do
 
-# rm -rf /tmp/results
+path=batch-$wg_batch_size/concurrency-$concurrency_level
+mkdir -p $path
+cd $path
+res_dir=`pwd`
+{% endif %}
+
+{% if with_nr_rings %}
+params_path=/sys/module/wireguard/parameters
+for wg_nr_ring in {{ nr_rings | join(" ") }}; do
+
+path=ring-$wg_nr_ring/
+mkdir -p $path
+cd $path
+res_dir=`pwd`
+{% endif %}
 
 for n_core in $ncore_set ; do
     echo "[`$now`] Test_case: n_core=$n_core"
-    # root_path=$results_path;
     mkdir -p CPU-$n_core;
     cd CPU-$n_core
 
-    if [ "$n_core" -eq "18" ]; then
-        echo off > /sys/devices/system/cpu/smt/control
-    else
-        echo on > /sys/devices/system/cpu/smt/control
-    fi
-
-    # Deactivate all but core 0
-    #for i in `seq 1 $(nproc)`; do
-    #    echo 0 > /sys/devices/system/cpu/cpu$i/online
-    #done
-
     for n_flow in {{ nflow_set | join(" ") }}; do
-        mkdir -p nflow-$n_flow
-        cd nflow-$n_flow
         
         SECONDS=0
         start=`date +%S`
         start_min=`date +%M`
         wait_before_start={{ wait_server }}
 
-        # Only enable n_flow cores
-        #for i in `seq 0 $((n_flow - 1))`; do
-        #    echo 1 > /sys/devices/system/cpu/cpu$i/online
-        #done
+        {% if with_batch_sizes %}
+        {% if custom_kernel_on == 'both' %} 
+        echo $wg_batch_size > $params_path/wg_batch_size
+        echo $concurrency_level > $params_path/concurrency_level
+        for conf in `ls ~/confs`; do wg-quick down ~/confs/$conf; done
+        for conf in `ls ~/confs`; do wg-quick up ~/confs/$conf; done
+
+        {% elif custom_kernel_on == 'client' %}
+        echo Not batched kernel version...
+
+        {% elif custom_kernel_on == 'server' %}
+        echo $wg_batch_size > $params_path/wg_batch_size
+        echo $concurrency_level > $params_path/concurrency_level
+        for conf in `ls ~/confs`; do wg-quick down ~/confs/$conf; done
+        for conf in `ls ~/confs`; do wg-quick up ~/confs/$conf; done
+        {% endif %}
+        {% endif %}
+
+        {% if with_nr_rings %}
+        {% if custom_kernel_on == 'both' %} 
+        echo $wg_nr_ring > $params_path/wg_nr_rings
+        for conf in `ls ~/confs`; do wg-quick down ~/confs/$conf; done
+        rmmod wireguard
+        insmod /tmp/encryptonce/wireguard.ko
+        for conf in `ls ~/confs`; do wg-quick up ~/confs/$conf; done
+
+        {% elif custom_kernel_on == 'client' %}
+        echo Not batched kernel version...
+
+        {% elif custom_kernel_on == 'server' %}
+        echo $wg_nr_ring > $params_path/wg_nr_rings
+        for conf in `ls ~/confs`; do wg-quick down ~/confs/$conf; done
+        rmmod wireguard
+        insmod /tmp/encryptonce/wireguard.ko
+        for conf in `ls ~/confs`; do wg-quick up ~/confs/$conf; done
+        {% endif %}
+        {% endif %}
+
+        mkdir -p nflow-$n_flow
+        cd nflow-$n_flow
 
         sleep $wait_before_start
 
-        mkdir -p $results_path/run-$run/$n_core/$n_flow
-        res_dir=$results_path/run-$run
+        sleep $(( {{ unit_time_s }} - 2 ))
 
         echo "[`$now`] Test_case: n_flow=$n_flow"
 
         echo "[`$now`] Launching global_perf test..."
         # sleep 10
-        $script_path/wg_test_global_perf.sh $res_dir $n_core $n_flow
+        $script_path/wg_test_global_perf.sh `pwd` $n_core $n_flow
 
         echo "[`$now`] Launching global_perf test..."
         # sleep 10
-        $script_path/wg_test_cpu_pidstat.sh $res_dir $n_core $n_flow
+        $script_path/wg_test_cpu_pidstat.sh `pwd` $n_core $n_flow
 
         # echo "[`$now`] Launching global_perf test...Done"
 
@@ -190,8 +201,8 @@ for n_core in $ncore_set ; do
         end=`date +%S`
         end_min=`date +%M`
         duration=`bc <<< "( (($end_min - $start_min + 60) % 60 ) * 60 + $end - $start ) "`
-        echo "[`$now`] trace-cmd start at $start_min:$start and end at $end_min:$end, so done in $duration secs. Sleeping for $(( {{ unit_time_s }} - duration ))..."
-        sleep $(( {{ unit_time_s }} - duration ))
+        echo "[`$now`] Sleeping for $(( 2 * {{ unit_time_s }} - duration ))..."
+        sleep $((  2 * {{ unit_time_s }} - duration ))
         killall -s SIGINT sar
         killall -s SIGINT pidstat
 
@@ -201,6 +212,16 @@ for n_core in $ncore_set ; do
     cd..
 done
 
+{% if with_nr_rings %}
 cd ../
+done
+{% endif %}
 
+{% if with_batch_sizes %}
+cd ../../
+done
+done
+{% endif %}
+
+cd ..
 done
