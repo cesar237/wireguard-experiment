@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#!/bin/bash
 
 ROOT=~/wireguard-experiment
 . $ROOT/scripts/global_vars.sh
@@ -7,7 +7,7 @@ ROOT=~/wireguard-experiment
 update_job_id
 
 
-OS=debian12-6.1.0
+OS=debian12-nfs
 JOB_ID=$(cat $data_dir/JOB_ID)
 
 

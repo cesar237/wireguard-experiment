@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#!/bin/bash
 
 ROOT=~/wireguard-experiment
 . $ROOT/scripts/global_vars.sh
