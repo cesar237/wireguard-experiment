@@ -4,6 +4,8 @@ ROOT=~/wireguard-experiment
 . $ROOT/scripts/global_vars.sh
 . $ROOT/scripts/helpers.sh
 
+touch ~/.bashrc
+
 update_job_id
 
 

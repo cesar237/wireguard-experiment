@@ -1,7 +1,3 @@
-Here is a professional and clear `README.md` file for your **wireguard-experiment** project:
-
----
-
 # wireguard-experiment
 
 **wireguard-experiment** is a framework for evaluating the performance of [WireGuard](https://www.wireguard.com/) at scale across distributed systems. It provides a collection of Bash scripts and Ansible playbooks to automate the setup, execution, and teardown of performance experiments across a fleet of machines.
@@ -26,22 +22,51 @@ Here is a professional and clear `README.md` file for your **wireguard-experimen
 
 ### 1. Reserve Machines
 
-Use any cloud or bare-metal provider to reserve the machines for the experiment. Ensure:
+If using grid5000, reserve machines with:
 
+```bash
+oarsub -t deploy -p <cluster> -l hosts=<nb_hosts>
+```
+
+Notes:
+- Reserve an odd number of machines
+- Reserve machines in deploy mode
+
+For other cloud or bare-metal providers, ensure:
 * SSH access is available
 * You have `root` privileges
 
-### 2. Update Inventory
+### 2. Set Up Environment Variables
 
-Edit the file:
+Source the global variables script:
 
+```bash
+. scripts/global_vars.sh
 ```
-EXPERIMENT_DATA/NODES
+
+### 3. Update Job ID
+
+```bash
+update_job_id
 ```
 
-...to include the IP addresses or hostnames of the machines.
+### 4. Deploy Debian 12 Environment
 
-### 3. Initialize Test Environment
+```bash
+./scripts/deploy_env.sh
+```
+
+### 5. Update Environment Variables Again
+
+```bash
+. scripts/global_vars.sh
+```
+
+### 6. Update Inventory
+
+The file `EXPERIMENT_DATA/NODES` should be automatically populated with the IP addresses or hostnames of the machines. Verify this file contains the correct information.
+
+### 7. Initialize Test Environment
 
 Run the following script to generate Ansible inventories and initialize metadata:
 
@@ -49,15 +74,27 @@ Run the following script to generate Ansible inventories and initialize metadata
 scripts/initialize_testenv.sh
 ```
 
-### 4. Launch the Evaluation
+### 8. Launch the Evaluation
 
-Use the provided wrapper script to run the entire setup and start the experiment:
+Run the setup playbook with default configuration:
 
 ```bash
-scripts/run_setup_eval.sh
+./scripts/run_playbook.sh setup-eval
 ```
 
-Alternatively, you can run the Ansible playbooks manually:
+Then run the WireGuard evaluation:
+
+```bash
+./scripts/run_playbook.sh start-wg-eval
+```
+
+Alternatively, you can specify a custom configuration:
+
+```bash
+./scripts/run_playbook.sh setup-eval <your_config>
+```
+
+For manual execution, use:
 
 ```bash
 ansible-playbook -i inventory/hosts.yaml playbooks/setup-eval.yml
@@ -66,7 +103,7 @@ ansible-playbook -i inventory/hosts.yaml playbooks/start-eval.yml
 
 > See the [Playbooks](#-ansible-playbooks) section for the full list of available playbooks.
 
-### 5. Configure Test Cases
+### 9. Configure Test Cases
 
 Edit one of the existing configs in `eval-configs/` or create your own. Example:
 
@@ -74,17 +111,23 @@ Edit one of the existing configs in `eval-configs/` or create your own. Example:
 eval-configs/benchmark-wireguard-multi-queue.yaml
 ```
 
+The default configuration is in:
+
+```
+eval-configs/default.yaml
+```
+
 Each config defines a specific setup and performance evaluation strategy.
 
-### 6. Retrieve Results
+### 10. Retrieve Results
 
 After the evaluation completes, collect results using:
 
 ```bash
-scripts/retrieve-results.sh
+./scripts/retrieve_results.sh
 ```
 
-Results will be stored in the `results/` directory.
+Results will be stored in the `results/` directory as `result-XXXXX.zip`, where XXXXX is a unique ID for the experiment.
 
 ---
 
@@ -94,9 +137,11 @@ The key playbooks are:
 
 * **setup-eval.yml** — Set up WireGuard, kernel modules, and other dependencies
 * **start-eval.yml** — Launch the performance evaluation
+* **start-wg-eval.yaml** — Launch the WireGuard-specific evaluation
 * **stop-eval.yml** — Stop all services and clean up
 * **reload-eval.yml** — Reload configuration or restart services
 * **upload-config-files.yml** — Push experiment config files to remote nodes
+* **install-dependencies.yml** — Install required dependencies on remote nodes
 
 ---
 
@@ -104,10 +149,13 @@ The key playbooks are:
 
 A few useful scripts:
 
+* `global_vars.sh` — Sets up global environment variables
 * `initialize_testenv.sh` — Prepares the experiment metadata and inventory
 * `run_setup_eval.sh` — High-level runner for setup and start
-* `retrieve-results.sh` — Pulls results back to the local machine
-* `deploy_env.sh`, `run_configs.sh`, etc. — Additional helpers for automation
+* `retrieve_results.sh` — Pulls results back to the local machine
+* `deploy_env.sh` — Deploys the Debian 12 environment
+* `run_playbook.sh` — Helper to run Ansible playbooks with configurations
+* `run_configs.sh`, etc. — Additional helpers for automation
 
 ---
 
@@ -117,9 +165,13 @@ You can define new experiment scenarios by creating new YAML files under `eval-c
 
 ---
 
-## 📊 Output & Results
+## Output & Results
 
-All benchmark data is collected and saved under the `results/` directory, with subdirectories for each test configuration and run.
+All benchmark data is collected and saved under the `results/` directory, with subdirectories for each test configuration and run. The results are packaged as `result-XXXXX.zip` files, where XXXXX is a unique ID for the experiment.
+
+### Analyzing Results
+
+To analyze the results, use the repository at [https://github.com/cesar237/wireguard-result-analysis.git](https://github.com/cesar237/wireguard-result-analysis.git). This repository contains a Jupyter notebook that will help you analyze the results.
 
 ---
 
@@ -129,8 +181,11 @@ All benchmark data is collected and saved under the `results/` directory, with s
 * Python 3.6+
 * Ansible 2.10+
 * SSH access to all nodes with root permissions
+* Grid5000 account (if using Grid5000 for machine reservation)
 * Optionally, patched Linux kernels or WireGuard modules (see `wireguard-artefacts/`)
 
-## Important Note
+## ⚠️ Important Notes
 
-* The current version only works fine with debian12 operating systems. To run the evaluation on other system, you need to update the names of the dependencies to install in playbooks/install-dependencies.yml
+* The current version only works properly with Debian 12 operating systems. To run the evaluation on other systems, you need to update the names of the dependencies to install in `playbooks/install-dependencies.yml`.
+* Always reserve an odd number of machines for optimal results.
+* The deployment process is currently optimized for Grid5000 infrastructure but can be adapted to other environments.
