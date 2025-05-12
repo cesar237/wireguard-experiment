@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#!/bin/bash
 
 clients=`cat CLIENTS`
 server=`cat SERVER`

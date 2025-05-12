@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#!/bin/bash
 
 # Use jq or yq to get necessary information with oarstat and the job's id
 get_nodes() {

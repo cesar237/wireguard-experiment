@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#!/bin/bash
 
 ip route add {{ hostvars[target_index[ansible_nodename]]['ansible_default_ipv4']['address'] }} via {{ server_address }}
 sysctl net.ipv4.ip_forward=1
