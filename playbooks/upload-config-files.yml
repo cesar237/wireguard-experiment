@@ -156,15 +156,18 @@
         dest: /etc/nginx/nginx.conf
         force: true
     - name: Send hls video file
+      ignore_errors: True
       copy:
         src: ../templates/hls-video.zip
         dest: /tmp/scripts/hls-video.zip
         force: true
     - name: Send dash video file
+      ignore_errors: True
       copy:
         src: ../templates/dash-video.zip
         dest: /tmp/scripts/dash-video.zip
     - name: Send nginx config script
+      ignore_errors: True
       copy:
         src: ../templates/configure_nginx.sh
         dest: /tmp/scripts/configure_nginx.sh

@@ -28,10 +28,7 @@ done
 nohup iptables -A FORWARD -i wg -j ACCEPT
 nohup iptables -t nat -A POSTROUTING -o {{ iface }} -j MASQUERADE 
 
-{% else %}
-
-
-{% if custom_kernel %}
+{% elif custom_kernel %}
 
 {% if custom_kernel_on == 'both' %}
 version={{ version_kernel }}
@@ -53,10 +50,10 @@ git checkout $version
 make && make install
 insmod wireguard.ko
 cd
-{% endif %}
+{% else %}
 
-# for i in `ls confs`; do 
-#     nohup wg-quick up ~/confs/$i ; 
-# done
+for i in `ls confs`; do 
+    nohup wg-quick up ~/confs/$i ; 
+done
 
 {% endif %}
