@@ -163,6 +163,14 @@ A few useful scripts:
 
 You can define new experiment scenarios by creating new YAML files under `eval-configs/`. These YAML files drive the configuration logic, interface with the test scripts, and define the evaluation parameters (e.g., batch size, queuing behavior, etc.).
 
+For detailed information about all available configuration parameters and their meanings, refer to the documentation file:
+
+```
+documentation/expe-config-format.md
+```
+
+This document provides a comprehensive explanation of each parameter in the configuration YAML files, including network settings, testing tool options, WireGuard implementation choices, and system tuning parameters.
+
 ---
 
 ## Output & Results
