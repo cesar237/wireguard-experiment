@@ -1,5 +1,7 @@
 #! /usr/bin/bash
 
+. scripts/global_vars.sh
+
 # Set config
 playbook=$1
 config=$2
@@ -9,6 +11,10 @@ ROOT=~/wireguard-experiment
 if [ -z "$config" ]; then
     config=default
 fi
+
+
+rm $data_dir/CURRENT_EXP
+echo $config > $data_dir/CURRENT_EXP
 
 if [ -z "$playbook" ]; then
     echo "Please, put a playbook!"

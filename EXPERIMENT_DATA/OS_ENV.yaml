@@ -1,0 +1,26 @@
+---
+name: debian12-6.1.0
+version: 1
+arch: x86_64
+alias: debian12-x64-nfs
+description: debian 12 (bookworm) for x86_64 with linux kernel 6.1.0-32-amd64
+author: cesaire.mounah-honore@inria.fr
+visibility: shared
+destructive: false
+os: linux
+image:
+  file: http://public.nancy.grid5000.fr/~hmounah/wireguard-envs/debian12-6.1.0.tar.zst
+  kind: tar
+  compression: zstd
+postinstalls:
+- archive: server:///grid5000/postinstalls/g5k-postinstall.tgz
+  compression: gzip
+  script: g5k-postinstall --net debian --net hpc --fstab nfs --restrict-user current
+    --disk-aliases
+boot:
+  kernel: "/vmlinuz"
+  initrd: "/initrd.img"
+  kernel_params: ''
+filesystem: ext4
+partition_type: 131
+multipart: false

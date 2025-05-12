@@ -6,8 +6,6 @@
 distribute_ssh_key
 
 # eval=benchmark-ipvs
-# rm $data_dir/CURRENT_EXP
-# echo $eval > $data_dir/CURRENT_EXP
 # scripts/run_playbook.sh setup-eval ${eval}
 # scripts/run_playbook.sh start-ipvs-eval ${eval}
 # scripts/retrieve-results.sh

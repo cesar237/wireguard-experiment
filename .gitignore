@@ -11,3 +11,10 @@ poc/
 install_dpdk.sh
 template/dash-video.zip
 template/hls-video.zip
+EXPERIMENT_DATA/CLIENTS
+EXPERIMENT_DATA/CURRENT_EXP
+EXPERIMENT_DATA/SERVER
+EXPERIMENT_DATA/TARGETS
+EXPERIMENT_DATA/TEST_CONFIG
+templates/dash-video.zip
+templates/hls-video.zip
