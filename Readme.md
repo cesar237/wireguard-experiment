@@ -134,5 +134,3 @@ All benchmark data is collected and saved under the `results/` directory, with s
 ## Important Note
 
 * The current version only works fine with debian12 operating systems. To run the evaluation on other system, you need to update the names of the dependencies to install in playbooks/install-dependencies.yml
-
----

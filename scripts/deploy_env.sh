@@ -15,7 +15,7 @@ JOB_ID=$(cat $data_dir/JOB_ID)
 get_nodes $JOB_ID > $data_dir/NODES
 
 # Keep the OS environment information
-kaenv3 debian12-nfs > $data_dir/OS_ENV.yaml
+kaenv3 $OS > $data_dir/OS_ENV.yaml
 
 # Deploy the same env on all machines
 kadeploy3 $OS $(ka_machine_args $JOB_ID)

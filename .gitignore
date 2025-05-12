@@ -1,5 +1,4 @@
 experiments-results/*
-EXPERIMENT_DATA/*
 wireguard-artefacts/*
 inventory/hosts.yaml
 results/*
